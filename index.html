@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thất Trùm Ta One</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root {
+            --bg-color: #fff1f2; --bg-image: url('image_bbe169.png'); --bg-filter: none;
+            --text-main: #4c1d95; --text-muted: #9d174d; --text-desc: #6b21a8;
+            --card-bg: rgba(255,255,255,0.65); --card-sub-bg: rgba(255,245,245,0.7);
+            --card-border: rgba(255,228,230,0.8); --content-bg: rgba(255,251,251,0.75);
+            --popup-bg: #ffffff; --toggle-bg: #db2777; --toggle-color: #ffffff;
+            --glass-blur: blur(12px); --dot-glow: rgba(251,113,133,0.15);
+        }
+        [data-theme="dark"] {
+            --bg-color: #0f172a; --bg-filter: invert(1) hue-rotate(180deg) brightness(0.4) contrast(1.2);
+            --text-main: #f8fafc; --text-muted: #fda4af; --text-desc: #d8b4fe;
+            --card-bg: rgba(30,41,59,0.75); --card-sub-bg: rgba(15,23,42,0.8);
+            --card-border: rgba(51,65,85,0.6); --content-bg: rgba(17,24,39,0.8);
+            --popup-bg: #1e293b; --toggle-bg: #f59e0b; --toggle-color: #0f172a;
+            --dot-glow: rgba(0,0,0,0.4);
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #db2777; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f43f5e; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-color); position: relative; color: var(--text-main);
+            padding: 40px 20px; overflow-x: hidden; transition: color 0.3s ease;
+        }
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--bg-image); background-repeat: repeat; background-size: 350px;
+            filter: var(--bg-filter); z-index: -1; transition: filter 0.5s ease;
+        }
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #loading-screen::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--bg-image); background-repeat: repeat; background-size: 350px;
+            filter: var(--bg-filter); z-index: -1;
+        }
+        #loading-screen.fade-out { opacity: 0; visibility: hidden; }
+        .loading-title {
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(45deg, #f43f5e, #db2777, #f59e0b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes pulse { from { transform: scale(0.95); opacity: 0.8; } to { transform: scale(1.05); opacity: 1; } }
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* ====================================================
+           FLOATING CONTROLS
+        ==================================================== */
+        .floating-controls {
+            position: fixed; bottom: 30px; right: 30px;
+            display: flex; flex-direction: column; gap: 15px; z-index: 1000;
+        }
+        .chat-toggle-wrapper { position: relative; width: 50px; height: 50px; }
+        .unread-badge {
+            position: absolute; top: -6px; right: -6px;
+            min-width: 20px; height: 20px; background: #e11d48; color: #fff;
+            font-size: 11px; font-weight: 800; border-radius: 999px;
+            display: flex; align-items: center; justify-content: center; padding: 0 5px;
+            border: 2px solid var(--bg-color); box-shadow: 0 2px 8px rgba(225,29,72,0.55);
+            opacity: 0; transform: scale(0);
+            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.175,0.885,0.32,1.6);
+            pointer-events: none; z-index: 10; line-height: 1;
+        }
+        .unread-badge.visible { opacity: 1; transform: scale(1); }
+        @keyframes badgePop { 0% { transform: scale(1); } 35% { transform: scale(1.5); } 65% { transform: scale(0.85); } 100% { transform: scale(1); } }
+        .unread-badge.pop { animation: badgePop 0.45s cubic-bezier(0.175,0.885,0.32,1.6); }
+        .floating-btn {
+            width: 50px; height: 50px; border-radius: 50%; background-color: var(--toggle-bg);
+            color: var(--toggle-color); border: none; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            display: flex; align-items: center; justify-content: center; font-size: 22px;
+            transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .floating-btn:hover { transform: scale(1.1) translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .floating-btn:active { transform: scale(0.95); }
+        .chat-toggle-wrapper.hidden-system { display: none !important; }
+
+        /* ====================================================
+           PROFILE PILL BUTTON - góc trên trái (hình chữ nhật bo tròn + tên)
+        ==================================================== */
+        .profile-toggle-wrapper { position: fixed; top: 20px; left: 20px; z-index: 2000; }
+
+        .profile-pill-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 16px 6px 6px;
+            background-color: var(--card-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--card-border); border-radius: 999px;
+            cursor: pointer; box-shadow: 0 4px 14px rgba(219,39,119,0.2);
+            transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+            white-space: nowrap; max-width: 220px;
+        }
+        .profile-pill-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 20px rgba(219,39,119,0.35);
+            border-color: #f43f5e;
+        }
+        .profile-pill-btn:active { transform: scale(0.97); }
+        .profile-pill-avatar {
+            width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+            border: 2px solid #db2777; flex-shrink: 0;
+        }
+        .profile-pill-name {
+            font-size: 13px; font-weight: 800; color: #db2777;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* CHAT POPUP */
+        .chat-popup-window {
+            position: fixed; bottom: 95px; right: 30px; width: 360px; height: 480px;
+            background-color: var(--card-bg); backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur); border: 2px solid var(--card-border);
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 1001;
+            display: flex; flex-direction: column; overflow: hidden;
+            opacity: 0; transform: translateY(20px) scale(0.95);
+            visibility: hidden; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.1);
+        }
+        .chat-popup-window.is-active { opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto; }
+
+        header { text-align: center; margin-bottom: 24px; opacity: 0; animation: fadeInUp 0.8s ease-out forwards; }
+        h1 {
+            background: linear-gradient(45deg,#f43f5e,#db2777,#f59e0b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: inline-block; font-size: 32px; font-weight: 800; margin-bottom: 12px;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        h1:hover { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(219,39,119,0.4)); }
+        .subtitle { color: var(--text-muted); font-size: 18px; transition: color 0.3s ease; }
+        .line { width: 96px; height: 4px; background-color: #f43f5e; margin: 16px auto 0; border-radius: 9999px; transition: width 0.3s ease; }
+        header:hover .line { width: 150px; }
+
+        .main-nav {
+            background-color: var(--card-bg); backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--card-border);
+            border-radius: 50px; padding: 14px 28px; margin-bottom: 32px;
+            box-shadow: 0 4px 15px var(--dot-glow);
+            display: flex; justify-content: center; align-items: center; gap: 40px;
+            opacity: 0; animation: fadeInUp 0.8s ease-out 0.2s forwards;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .nav-link {
+            font-size: 15px; font-weight: 700; color: var(--text-main); text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.3s ease; position: relative; padding: 4px 0;
+        }
+        .nav-link:hover { color: #db2777; transform: translateY(-2px); }
+        .nav-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2.5px; background-color: #f43f5e; border-radius: 999px; transition: width 0.3s ease; }
+        .nav-link:hover::after { width: 100%; }
+
+        @media (max-width: 600px) {
+            .main-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; gap: 28px; border-radius: 20px; padding: 12px 20px; }
+            .main-nav::-webkit-scrollbar { display: none; }
+            .chat-popup-window { right: 15px; bottom: 90px; width: calc(100% - 30px); height: 440px; }
+        }
+
+        .member-section {
+            background-color: var(--card-bg); backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--card-border);
+            border-radius: 20px; padding: 24px; margin-bottom: 24px;
+            box-shadow: 0 4px 15px var(--dot-glow); opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards; scroll-margin-top: 30px;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .member-title { font-size: 16px; font-weight: 700; color: #db2777; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .member-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 16px; }
+        @media (max-width: 1024px) { .member-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 768px) { .member-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 480px) { .member-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .member-card {
+            background-color: var(--card-sub-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 16px 8px; text-align: center;
+            transition: all 0.4s cubic-bezier(0.165,0.84,0.44,1); position: relative;
+        }
+        .member-card:hover { transform: translateY(-8px); background-color: var(--popup-bg); border-color: #f43f5e; box-shadow: 0 10px 20px rgba(244,63,94,0.15); z-index: 10; }
+        .member-avatar {
+            width: 64px; height: 64px; border-radius: 50%; object-fit: cover;
+            margin: 0 auto 12px; background-color: var(--card-border); display: block;
+            border: 2px solid #db2777; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .member-card:hover .member-avatar { transform: scale(1.12) rotate(8deg); border-color: #f43f5e; box-shadow: 0 4px 10px rgba(219,39,119,0.2); }
+        .member-name { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.3s ease; }
+        .member-role { font-size: 11px; color: var(--text-muted); background-color: var(--card-border); padding: 2px 8px; border-radius: 9999px; display: inline-block; transition: all 0.3s ease; }
+        .member-card:hover .member-role { background-color: #f43f5e; color: #fff; }
+
+        .member-profile-popup {
+            position: absolute; bottom: 110%; left: 50%;
+            transform: translateX(-50%) translateY(10px); width: 220px;
+            background-color: var(--popup-bg); border: 2px solid #f43f5e;
+            border-radius: 14px; padding: 14px;
+            box-shadow: 0 10px 25px rgba(244,63,94,0.2);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            text-align: left; z-index: 99;
+        }
+        .member-profile-popup::after {
+            content: ""; position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%); border-width: 8px; border-style: solid;
+            border-color: #f43f5e transparent transparent transparent;
+        }
+        .member-card:hover .member-profile-popup { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .profile-title { font-size: 11px; font-weight: 700; color: #db2777; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px dashed var(--card-border); padding-bottom: 4px; }
+        .profile-info { font-size: 12px; color: var(--text-main); line-height: 1.6; }
+        .profile-info strong { color: var(--text-muted); }
+
+        @media (max-width: 768px) {
+            .member-profile-popup { bottom: auto; top: 110%; transform: translateX(-50%) translateY(-10px); }
+            .member-profile-popup::after { top: auto; bottom: 100%; border-color: transparent transparent #f43f5e transparent; }
+            .member-card:hover .member-profile-popup { transform: translateX(-50%) translateY(0); }
+        }
+
+        .category-item {
+            background-color: var(--card-bg); backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--card-border);
+            border-radius: 16px; margin-bottom: 24px; overflow: hidden;
+            box-shadow: 0 4px 15px var(--dot-glow); opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #biet-danh, #team-color, #bo-chi-so, #album { scroll-margin-top: 30px; }
+        .category-item summary {
+            padding: 20px 24px; font-size: 18px; font-weight: 700; color: var(--text-main);
+            cursor: pointer; list-style: none;
+            display: flex; justify-content: space-between; align-items: center;
+            user-select: none; transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative; z-index: 2;
+        }
+        .category-item summary:hover { background-color: var(--card-sub-bg); }
+        .category-item summary::after {
+            content: "▼"; font-size: 14px; color: #db2777; background-color: var(--card-sub-bg);
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.4s cubic-bezier(0.25,1,0.5,1);
+        }
+        .category-item.is-open summary::after { color: #fff; background-color: #f43f5e; transform: scale(1.05) rotate(180deg); }
+        .category-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.25,1,0.5,1); }
+        .category-content {
+            overflow: hidden; background-color: var(--content-bg);
+            opacity: 0; transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.25,1,0.5,1), padding 0.4s ease, background-color 0.3s ease;
+            padding: 0 24px;
+        }
+
+        .nickname-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
+        .nickname-table th, .nickname-table td { border: 1px solid var(--card-border); padding: 12px 16px; text-align: left; transition: all 0.2s ease; }
+        .nickname-table th { background-color: var(--card-border); color: var(--text-muted); font-weight: 700; }
+        .nickname-table tr:nth-child(even) { background-color: var(--card-sub-bg); }
+        .nickname-table tr:hover { background-color: var(--card-border); }
+        .nickname-table tr:hover td { color: #db2777; }
+
+        .tc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 20px; padding: 24px 0; }
+        .tc-card {
+            background: var(--card-sub-bg); border: 2px solid var(--card-border); border-radius: 16px;
+            padding: 18px; display: flex; flex-direction: column; gap: 12px; position: relative;
+            transition: 0.3s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 4px 4px 0px var(--card-border);
+        }
+        .tc-card:hover { transform: translate(-4px,-4px); box-shadow: 0 10px 25px rgba(244,63,94,0.3); border-color: #f43f5e; background-color: var(--popup-bg); }
+        .tc-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
+        .tc-name { font-weight: 800; font-size: 16px; color: #db2777; letter-spacing: 0.5px; }
+        .tc-color-tag { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+        .tc-body { display: flex; gap: 14px; align-items: flex-start; }
+        .tc-icon-box { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; object-fit: cover; border: 2px solid var(--card-border); }
+        .tc-card:hover .tc-icon-box { border-color: #f43f5e; }
+        .tc-desc { font-size: 13.5px; color: var(--text-desc); line-height: 1.4; font-weight: 500; }
+        .tc-stats { background: var(--card-border); border-radius: 10px; padding: 10px; font-size: 12px; display: flex; justify-content: space-around; margin-top: auto; }
+        .stat-point { text-align: center; }
+        .stat-val { display: block; font-weight: 800; color: #db2777; font-size: 14px; }
+        .stat-lab { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+        .fut-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; justify-items: center; padding: 24px 0; }
+        @media (max-width: 1024px) { .fut-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 720px) { .fut-grid { grid-template-columns: 1fr; } }
+        .fut-card {
+            background: linear-gradient(135deg, var(--card-border) 0%, var(--card-sub-bg) 50%, rgba(244,63,94,0.1) 100%);
+            border: 2px solid #db2777; border-radius: 18px; width: 320px; min-height: 380px;
+            padding: 24px; position: relative; box-shadow: 0 8px 16px rgba(219,39,119,0.1);
+            transition: all 0.4s cubic-bezier(0.165,0.84,0.44,1);
+            overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 8px;
+        }
+        .fut-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            transform: rotate(45deg); transition: all 0.6s ease; pointer-events: none;
+        }
+        .fut-card:hover { transform: translateY(-10px) scale(1.03); border-color: #f43f5e; box-shadow: 0 15px 30px rgba(244,63,94,0.25); background: var(--popup-bg); }
+        .fut-card:hover::before { left: -30%; top: -30%; }
+        .fut-header { display: flex; align-items: center; gap: 16px; border-bottom: 2px dashed var(--card-border); padding-bottom: 14px; margin-bottom: 14px; }
+        .fut-ovr-box { text-align: center; min-width: 45px; display: flex; align-items: center; justify-content: center; }
+        .fut-ovr { font-size: 34px; font-weight: 900; color: #db2777; line-height: 1; }
+        .fut-img { width: 58px; height: 58px; border-radius: 50%; object-fit: cover; border: 2px solid #db2777; background-color: var(--popup-bg); }
+        .fut-name { font-size: 18px; font-weight: 700; color: var(--text-main); flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fut-stats { margin-bottom: 14px; }
+        .fut-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-item { display: flex; align-items: center; justify-content: space-between; background-color: var(--card-border); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--card-border); transition: background-color 0.3s ease; }
+        .fut-card:hover .stat-item { background-color: var(--card-sub-bg); }
+        .stat-num { font-size: 15px; font-weight: 800; color: #db2777; }
+        .stat-label { font-size: 12px; font-weight: 600; color: var(--text-desc); }
+        .fut-hidden-traits { background-color: var(--card-border); border: 1px dashed #f43f5e; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+        .fut-card:hover .fut-hidden-traits { background-color: var(--card-sub-bg); }
+        .fut-hidden-traits strong { color: #db2777; font-weight: 700; display: inline-block; margin-right: 4px; }
+
+        .gallery { column-count: 4; column-gap: 20px; padding: 24px 0; }
+        @media (max-width: 1024px) { .gallery { column-count: 3; } }
+        @media (max-width: 768px) { .gallery { column-count: 2; } }
+        @media (max-width: 480px) { .gallery { column-count: 1; } }
+        .card { break-inside: avoid; background-color: var(--card-sub-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; transition: all 0.4s cubic-bezier(0.165,0.84,0.44,1); }
+        .card:hover { transform: translateY(-6px) scale(1.02); border-color: #f43f5e; box-shadow: 0 12px 24px rgba(244,63,94,0.12); background-color: var(--popup-bg); }
+        .card img { width: 100%; height: auto; display: block; background-color: var(--card-border); }
+        .card-body { padding: 16px; }
+        .message { font-size: 13px; color: var(--text-desc); line-height: 1.5; margin-bottom: 12px; white-space: pre-line; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--card-border); font-size: 11px; color: var(--text-muted); }
+        .author { font-weight: 600; color: #db2777; }
+
+        .hidden-system { display: none !important; }
+
+        .login-overlay-container {
+            background-color: var(--card-bg); backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur); border: 2px solid var(--card-border);
+            padding: 35px 30px; border-radius: 20px; box-shadow: 0 10px 25px var(--dot-glow);
+            width: 100%; max-width: 420px; margin: 40px auto; text-align: center;
+            opacity: 0; animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .login-overlay-container h2 {
+            font-size: 22px; font-weight: 800; margin-bottom: 25px;
+            background: linear-gradient(45deg,#f43f5e,#db2777,#f59e0b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sys-input-group { margin-bottom: 20px; text-align: left; }
+        .sys-input-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+        .sys-input-group input { width: 100%; padding: 12px 16px; border: 2px solid var(--card-border); border-radius: 12px; font-size: 15px; background-color: var(--card-sub-bg); color: var(--text-main); outline: none; transition: all 0.3s ease; }
+        .sys-input-group input:focus { border-color: #f43f5e; background-color: var(--popup-bg); }
+        .sys-login-btn { width: 100%; padding: 14px; background: linear-gradient(45deg,#f43f5e,#db2777); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 10px rgba(219,39,119,0.2); transition: all 0.3s ease; }
+        .sys-login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(219,39,119,0.3); }
+        .sys-error-msg { color: #e11d48; font-size: 13px; font-weight: 600; margin-top: 14px; min-height: 18px; }
+
+        .chat-box-layout { display: flex; flex-direction: column; width: 100%; height: 100%; }
+        .chat-box-header { background-color: var(--card-border); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--card-border); }
+        .chat-box-header .user-badge { font-weight: 800; color: #db2777; font-size: 14px; }
+        .chat-header-actions { display: flex; align-items: center; gap: 10px; }
+        .sys-minimize-btn { background-color: var(--card-sub-bg); color: #db2777; border: 1px solid var(--card-border); width: 26px; height: 26px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .sys-minimize-btn:hover { background-color: #db2777; color: white; transform: scale(1.05); }
+        .chat-box-header .sys-logout-btn { background-color: #f43f5e; color: white; border: none; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s ease; }
+        .chat-box-header .sys-logout-btn:hover { background-color: #b91c1c; transform: scale(1.05); }
+        .chat-box-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: var(--content-bg); }
+        .chat-msg-row {
+            max-width: 80%; padding: 10px 14px; border-radius: 16px;
+            font-size: 14px; line-height: 1.4; word-break: break-word;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .chat-msg-row.type-other { background-color: var(--card-border); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; }
+        .chat-msg-row.type-me { background: linear-gradient(135deg,#f43f5e,#db2777); color: white; align-self: flex-end; border-top-right-radius: 4px; }
+        .chat-msg-row .msg-sender-name { font-size: 10.5px; font-weight: 800; margin-bottom: 3px; opacity: 0.8; }
+        .chat-msg-row.type-me .msg-sender-name { color: #ffe4e6; }
+        .chat-msg-row.type-other .msg-sender-name { color: #db2777; }
+        .chat-box-footer { display: flex; padding: 12px; background-color: var(--card-border); border-top: 2px solid var(--card-border); gap: 8px; }
+        .chat-box-footer input { flex: 1; padding: 10px 14px; border: 2px solid var(--card-border); background-color: var(--popup-bg); color: var(--text-main); border-radius: 10px; outline: none; font-size: 14px; }
+        .chat-box-footer .sys-send-btn { padding: 0 16px; background: linear-gradient(45deg,#f43f5e,#db2777); color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .chat-box-footer .sys-send-btn:hover { transform: scale(1.03); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ====================================================
+           MODAL CÁ NHÂN HÓA
+        ==================================================== */
+        .profile-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .profile-modal-overlay.is-open { opacity: 1; visibility: visible; }
+        .profile-modal-box {
+            background: var(--popup-bg); border: 2px solid var(--card-border); border-radius: 24px;
+            width: 100%; max-width: 440px; padding: 32px 28px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;
+            transform: translateY(24px) scale(0.97);
+            transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .profile-modal-overlay.is-open .profile-modal-box { transform: translateY(0) scale(1); }
+        .profile-modal-close {
+            position: absolute; top: 16px; right: 18px; background: var(--card-sub-bg);
+            border: 1px solid var(--card-border); color: var(--text-muted);
+            width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; line-height: 1;
+        }
+        .profile-modal-close:hover { background: #f43f5e; color: #fff; border-color: #f43f5e; transform: scale(1.1) rotate(90deg); }
+        .profile-modal-title {
+            font-size: 20px; font-weight: 800;
+            background: linear-gradient(45deg,#f43f5e,#db2777,#f59e0b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 24px; display: flex; align-items: center; gap: 8px;
+        }
+        .profile-avatar-section { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
+        .profile-avatar-wrap { position: relative; width: 96px; height: 96px; cursor: pointer; }
+        .profile-avatar-preview { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid #db2777; box-shadow: 0 4px 16px rgba(219,39,119,0.25); display: block; transition: filter 0.25s ease; }
+        .profile-avatar-wrap:hover .profile-avatar-preview { filter: brightness(0.7); }
+        .profile-avatar-overlay { position: absolute; inset: 0; border-radius: 50%; background: rgba(244,63,94,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease; pointer-events: none; font-size: 22px; }
+        .profile-avatar-wrap:hover .profile-avatar-overlay { opacity: 1; }
+        .profile-avatar-hint { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .avatar-tabs { display: flex; border: 2px solid var(--card-border); border-radius: 10px; overflow: hidden; margin-bottom: 10px; width: 100%; }
+        .avatar-tab-btn { flex: 1; padding: 8px 0; background: var(--card-sub-bg); border: none; color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+        .avatar-tab-btn.active { background: linear-gradient(45deg,#f43f5e,#db2777); color: #fff; }
+        .avatar-tab-panel { display: none; }
+        .avatar-tab-panel.active { display: block; }
+        .profile-url-row { display: flex; gap: 8px; }
+        .profile-url-row input { flex: 1; padding: 9px 12px; border: 2px solid var(--card-border); border-radius: 10px; font-size: 13px; background: var(--card-sub-bg); color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .profile-url-row input:focus { border-color: #f43f5e; }
+        .profile-url-apply-btn { padding: 0 14px; background: linear-gradient(45deg,#f43f5e,#db2777); color: #fff; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .profile-url-apply-btn:hover { transform: scale(1.05); }
+        .profile-upload-label { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; border: 2px dashed #db2777; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; color: #db2777; background: var(--card-sub-bg); transition: all 0.2s ease; width: 100%; }
+        .profile-upload-label:hover { background: rgba(244,63,94,0.08); border-color: #f43f5e; }
+        #profile-file-input { display: none; }
+        .profile-field-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .profile-bio-input { width: 100%; padding: 11px 14px; border: 2px solid var(--card-border); border-radius: 12px; font-size: 13px; background: var(--card-sub-bg); color: var(--text-main); outline: none; resize: vertical; min-height: 80px; max-height: 150px; font-family: inherit; line-height: 1.5; transition: border-color 0.2s; }
+        .profile-bio-input:focus { border-color: #f43f5e; background: var(--popup-bg); }
+        .profile-char-count { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 4px; }
+        .profile-char-count.warn { color: #f59e0b; }
+        .profile-char-count.over { color: #e11d48; }
+        .profile-username-display { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 2px solid var(--card-border); border-radius: 12px; background: var(--card-sub-bg); font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; }
+        .profile-username-display .lock-icon { font-size: 13px; color: var(--text-muted); background: var(--card-border); width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .profile-readonly-hint { font-size: 10px; color: var(--text-muted); margin-top: 4px; margin-bottom: 20px; }
+        .profile-save-btn { width: 100%; padding: 13px; background: linear-gradient(45deg,#f43f5e,#db2777); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 12px rgba(219,39,119,0.25); transition: all 0.3s ease; }
+        .profile-save-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(219,39,119,0.35); }
+        .profile-save-btn:active { transform: scale(0.98); }
+        .profile-save-toast { text-align: center; font-size: 13px; font-weight: 700; color: #16a34a; min-height: 18px; margin-top: 10px; opacity: 0; transition: opacity 0.3s ease; }
+        .profile-save-toast.show { opacity: 1; }
+
+        .chat-header-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #db2777; flex-shrink: 0; }
+
+        /* Avatar trong bong bóng chat - clickable */
+        .chat-msg-avatar {
+            width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--card-border); flex-shrink: 0; align-self: flex-end;
+            cursor: pointer; transition: all 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .chat-msg-avatar:hover {
+            transform: scale(1.18); border-color: #f43f5e;
+            box-shadow: 0 3px 10px rgba(244,63,94,0.4);
+        }
+
+        .chat-msg-row-wrap { display: flex; align-items: flex-end; gap: 6px; }
+        .chat-msg-row-wrap.wrap-me { flex-direction: row-reverse; }
+        .chat-header-bio { font-size: 10px; color: var(--text-muted); font-style: italic; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .chat-header-info { display: flex; flex-direction: column; gap: 1px; }
+
+        /* ====================================================
+           MINI PROFILE POPUP (bấm avatar trong chat)
+        ==================================================== */
+        .mini-profile-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            z-index: 3000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.25s ease;
+        }
+        .mini-profile-overlay.is-open { opacity: 1; visibility: visible; }
+        .mini-profile-box {
+            background: var(--popup-bg); border: 2px solid #f43f5e;
+            border-radius: 22px; width: 290px; padding: 28px 22px;
+            box-shadow: 0 16px 48px rgba(244,63,94,0.28); position: relative;
+            transform: translateY(24px) scale(0.93);
+            transition: transform 0.32s cubic-bezier(0.175,0.885,0.32,1.275);
+            text-align: center;
+        }
+        .mini-profile-overlay.is-open .mini-profile-box { transform: translateY(0) scale(1); }
+        .mini-profile-close {
+            position: absolute; top: 12px; right: 14px; background: var(--card-sub-bg);
+            border: 1px solid var(--card-border); color: var(--text-muted);
+            width: 28px; height: 28px; border-radius: 50%; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; line-height: 1;
+        }
+        .mini-profile-close:hover { background: #f43f5e; color: #fff; border-color: #f43f5e; transform: scale(1.1) rotate(90deg); }
+        .mini-profile-avatar {
+            width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+            border: 3px solid #db2777; margin: 0 auto 14px; display: block;
+            box-shadow: 0 4px 18px rgba(219,39,119,0.3);
+        }
+        .mini-profile-username {
+            font-size: 18px; font-weight: 800;
+            background: linear-gradient(45deg,#f43f5e,#db2777);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .mini-profile-bio {
+            font-size: 13px; color: var(--text-muted); font-style: italic;
+            line-height: 1.5; min-height: 18px; margin-bottom: 4px;
+        }
+        .mini-profile-divider { height: 1px; background: var(--card-border); margin: 14px 0 10px; border-radius: 999px; }
+        .mini-profile-hint { font-size: 11px; color: var(--text-desc); font-style: italic; opacity: 0.75; }
+
+        @media (max-width: 480px) { .profile-modal-box { margin: 16px; padding: 24px 18px; } .profile-pill-btn { max-width: 160px; } .profile-pill-name { font-size: 12px; } }
+	.profile-logout-btn {
+    width: 100%;
+    padding: 13px;
+    background: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+.profile-logout-btn:hover {
+    background: #e11d48;
+    transform: translateY(-2px);
+}
+.album-img { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+.album-img:hover { transform: scale(1.05); }
+#lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; }
+#lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="loading-screen">
+    <div class="loading-title">✨ Thất Trùm Ta One ✨</div>
+</div>
+
+<div class="floating-controls">
+    <div class="chat-toggle-wrapper hidden-system" id="chat-toggle-wrapper">
+        <button class="floating-btn" id="chat-toggle-btn" title="Mở phòng chat" onclick="toggleChatPopup()">💬</button>
+        <span class="unread-badge" id="unread-badge">0</span>
+    </div>
+    <button class="floating-btn" id="theme-toggle" title="Thay đổi giao diện">🌙</button>
+</div>
+
+<!-- PROFILE PILL BUTTON - góc trên trái -->
+<div class="profile-toggle-wrapper hidden-system" id="profile-toggle-wrapper">
+    <button class="profile-pill-btn" onclick="openProfileModal()" title="Hồ sơ cá nhân">
+        <img id="profile-float-avatar" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" class="profile-pill-avatar" alt="avatar">
+        <span class="profile-pill-name" id="profile-pill-name">—</span>
+    </button>
+</div>
+
+<!-- MODAL CÁ NHÂN HÓA TÀI KHOẢN -->
+<div class="profile-modal-overlay" id="profile-modal-overlay" onclick="handleProfileOverlayClick(event)">
+    <div class="profile-modal-box">
+        <button class="profile-modal-close" onclick="closeProfileModal()">✕</button>
+        <div class="profile-modal-title">✨ Hồ Sơ Của Tôi</div>
+        <div class="profile-field-label">👤 Tên tài khoản</div>
+        <div class="profile-username-display">
+            <span class="lock-icon">🔒</span>
+            <span id="profile-display-username">—</span>
+        </div>
+        <div class="profile-readonly-hint">* Tên tài khoản không thể thay đổi</div>
+        <div class="profile-avatar-section">
+            <div class="profile-avatar-wrap" onclick="document.getElementById('profile-file-input').click()">
+                <img id="profile-avatar-preview" class="profile-avatar-preview" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="Avatar">
+                <div class="profile-avatar-overlay">📷</div>
+            </div>
+            <span class="profile-avatar-hint">Nhấn vào ảnh để đổi avatar</span>
+        </div>
+        <div class="avatar-tabs">
+            <button class="avatar-tab-btn active" onclick="switchAvatarTab('upload', this)">📁 Upload ảnh</button>
+            <button class="avatar-tab-btn" onclick="switchAvatarTab('url', this)">🔗 Dán URL</button>
+        </div>
+        <div id="avatar-tab-upload" class="avatar-tab-panel active" style="margin-bottom:16px;">
+            <label class="profile-upload-label" for="profile-file-input">📂 Chọn ảnh từ máy (JPG, PNG, GIF...)</label>
+            <input type="file" id="profile-file-input" accept="image/*" onchange="handleAvatarFileChange(event)">
+        </div>
+        <div id="avatar-tab-url" class="avatar-tab-panel" style="margin-bottom:16px;">
+            <div class="profile-url-row">
+                <input type="text" id="profile-avatar-url-input" placeholder="Dán link ảnh vào đây...">
+                <button class="profile-url-apply-btn" onclick="applyAvatarUrl()">Áp dụng</button>
+            </div>
+        </div>
+        <div class="profile-field-label" style="margin-top:4px;">✍️ Bio / Giới thiệu bản thân</div>
+        <textarea class="profile-bio-input" id="profile-bio-input" maxlength="120" placeholder="Viết gì đó về bản thân... (tối đa 120 ký tự)" oninput="updateBioCount()"></textarea>
+        <div class="profile-char-count" id="profile-bio-count">0 / 120</div>
+        <button class="profile-save-btn" onclick="saveProfileData()">💾 Lưu</button>
+        <div class="profile-save-toast" id="profile-save-toast">✅ Đã lưu thành công!</div>
+	<button class="profile-logout-btn" onclick="handleSystemLogout()">Đăng xuất tài khoản</button>
+    </div>
+</div>
+
+<!-- MINI PROFILE POPUP (xem profile người khác trong chat) -->
+<div class="mini-profile-overlay" id="mini-profile-overlay" onclick="handleMiniProfileOverlayClick(event)">
+    <div class="mini-profile-box">
+        <button class="mini-profile-close" onclick="closeMiniProfile()">✕</button>
+        <img id="mini-profile-avatar" class="mini-profile-avatar" src="" alt="avatar">
+        <div class="mini-profile-username" id="mini-profile-username">—</div>
+        <div class="mini-profile-bio" id="mini-profile-bio"></div>
+        <div class="mini-profile-divider"></div>
+        <div class="mini-profile-hint" id="mini-profile-hint"></div>
+    </div>
+</div>
+
+<div class="chat-popup-window" id="sys-chat-popup">
+    <div class="chat-box-layout">
+        <div class="chat-box-header">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                <img id="chat-header-avatar" class="chat-header-avatar" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="avatar" onclick="openProfileModal()" title="Chỉnh hồ sơ" style="cursor:pointer;">
+                <div class="chat-header-info">
+                    <span id="sys-welcome-user" class="user-badge">Tài khoản: Đang tải...</span>
+                    <span id="chat-header-bio" class="chat-header-bio"></span>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button class="sys-minimize-btn" title="Thu nhỏ" onclick="toggleChatPopup()">➖</button>
+            </div>
+        </div>
+        <div id="sys-chat-messages" class="chat-box-messages"></div>
+        <div class="chat-box-footer">
+            <input type="text" id="sys-message-input" placeholder="Nhập nội dung nhắn tin..." onkeypress="handleSysKeyPress(event)">
+            <button class="sys-send-btn" onclick="sendSystemMessage()">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<div id="sys-login-screen" class="login-overlay-container">
+    <h2>🔒 M là ai</h2>
+    <div class="sys-input-group">
+        <label for="sys-username">Tên tài khoản</label>
+        <input type="text" id="sys-username" placeholder="Nhập tên tài khoản...">
+    </div>
+    <div class="sys-input-group">
+        <label for="sys-password">Mật khẩu</label>
+        <input type="password" id="sys-password" placeholder="Nhập mật khẩu...">
+    </div>
+    <button class="sys-login-btn" onclick="handleSystemLogin()">Vô</button>
+    <div id="sys-error-message" class="sys-error-msg"></div>
+</div>
+
+<div class="container hidden-system" id="sys-main-content">
+    <header>
+        <h1>✨ Thất Trùm Ta One ✨</h1>
+        <p class="subtitle">Tổ 1 A5 K67 THPT Ngô Quyền 2023-2026</p>
+        <div class="line"></div>
+    </header>
+    <nav class="main-nav">
+        <a href="#thanh-vien" class="nav-link">👥 Thành Viên</a>
+        <a href="#biet-danh" class="nav-link">📝 Biệt Danh</a>
+        <a href="#team-color" class="nav-link">🎨 Team Color</a>
+        <a href="#bo-chi-so" class="nav-link">📊 Bộ Chỉ Số</a>
+        <a href="#album" class="nav-link">📸 Album Kỷ Niệm</a>
+    </nav>
+
+    <div class="member-section" id="thanh-vien">
+        <p class="member-title">👥 Thành Viên</p>
+        <div class="member-grid">
+            <div class="member-card">
+                <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1508329222303780965/Screenshot_2026-05-25_113931.png?ex=6a16760d&is=6a15248d&hm=2ebaaf692065a77d2278bbc929038166492400a4bdbacfed023bced7890d6939&=&format=webp&quality=lossless&width=609&height=556" alt="Thành viên">
+                <p class="member-name">Thành Nhân</p>
+                <span class="member-role">Strawberry</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Lê Công Thành Nhân</p>
+                        <p><strong>Birthday:</strong> 30/09/2008</p>
+                        <p><strong>Hobby:</strong> Xem bóng đá, đạp xe</p>
+                        <p><strong>Skill:</strong> Gánh bạn bè khi kiểm tra, thi, trùm ảo tưởng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="member-card">
+                <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506962049589051462/image.png?ex=6a16c2c6&is=6a157146&hm=0d29822fa9796700332c66f0024fcfd59d983f259486ae1022718a01fe348fd5&=&format=webp&quality=lossless&width=292&height=285" alt="Thành viên">
+                <p class="member-name">Phương Duy</p>
+                <span class="member-role">Cream</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Phùng Ngọc Phương Duy</p>
+                        <p><strong>Birthday:</strong> 13/11/2008</p>
+                        <p><strong>Hobby:</strong> Ăn ngủ bùng nổ</p>
+                        <p><strong>Skill:</strong> Càn quét đồ ăn để tránh lãng phí, trùm ảo tưởng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="member-card">
+                <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506961047053926520/image.png?ex=6a16c1d7&is=6a157057&hm=feb512f9b2365bd52ad0b33a134ea042eafc726ab3304b047338c5ae687d7467&=&format=webp&quality=lossless&width=259&height=289" alt="Thành viên">
+                <p class="member-name">Đình Phát</p>
+                <span class="member-role">Speed</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Nguyễn Đình Phát</p>
+                        <p><strong>Birthday:</strong> 19/02/2008</p>
+                        <p><strong>Hobby:</strong> Thể thao, chơi bời, ăn ngủ bùng nổ</p>
+                        <p><strong>Skill:</strong> Hấp thụ, đa năng, càn quét đồ ăn thừa</p>
+                    </div>
+                </div>
+            </div>
+            <div class="member-card">
+                <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506962209631375490/691405557_2114587245785143_8485165994705541429_n.png?ex=6a16c2ec&is=6a15716c&hm=c9a2a2dea9ebddfc8622dbccf94b3f093c0517a31e3524500974990e140f401a&=&format=webp&quality=lossless&width=756&height=682" alt="Thành viên">
+                <p class="member-name">Đức Thịnh</p>
+                <span class="member-role">Cao Palmer</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Cao Đức Thịnh</p>
+                        <p><strong>Birthday:</strong> 09/07/2008</p>
+                        <p><strong>Hobby:</strong> Xem Barca, đấm nhau với Alien, vẽ cc</p>
+                        <p><strong>Skill:</strong> Người nhỏ ho khọt hắt xì to, ăn thịt chó</p>
+                    </div>
+                </div>
+            </div>
+            <div class="member-card">
+                <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506961708898455673/image.png?ex=6a102af5&is=6a0ed975&hm=f346a4f5c62b27abef090a1ad017a8551aaeb8ac6220b14e1609dd38a82a0c58&=&format=webp&quality=lossless&width=436&height=447" alt="Thành viên">
+                <p class="member-name">Quốc Việt</p>
+                <span class="member-role">Sharp</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Nguyễn Quốc Việt</p>
+                        <p><strong>Birthday:</strong> 21/08/2008</p>
+                        <p><strong>Hobby:</strong> Genshin, làm toán💀</p>
+                        <p><strong>Skill:</strong> Dành nửa ngày để học💀, dành nửa ngày để genshin💀💀</p>
+                    </div>
+                </div>
+            </div>
+            <div class="member-card">
+                <img class="member-avatar" src="https://picsum.photos/150" alt="Thành viên">
+                <p class="member-name">Bảo Ngọc</p>
+                <span class="member-role">Alien</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Nguyễn Song Bảo Ngọc</p>
+                        <p><strong>Birthday:</strong> 09/02/2008</p>
+                        <p><strong>Hobby:</strong> Đi phượt, đi chơi, đọc truyện, nghe audio</p>
+                        <p><strong>Skill:</strong> Ghi nhớ năng suất, trùm thanh toán, streak 12 năm hsg</p>
+                    </div>
+                </div>
+            </div>
+            <div class="member-card">
+                <img class="member-avatar" src="https://picsum.photos/151" alt="Song Yên">
+                <p class="member-name">Song Yên</p>
+                <span class="member-role">Newbie</span>
+                <div class="member-profile-popup">
+                    <p class="profile-title">✨ PROFILE</p>
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> Nguyễn Thị Song Yên</p>
+                        <p><strong>Birthday:</strong> 11/04/2008</p>
+                        <p><strong>Hobby:</strong> Spam locket, đi chơi, chụp ảnh</p>
+                        <p><strong>Skill:</strong> Vẫy chân như cánh quạt trực thăng, streak 12 năm hsg</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <details class="category-item" id="biet-danh">
+        <summary>📝 Bộ Sưu Tập Biệt Danh</summary>
+        <div class="category-wrapper">
+            <div class="category-content">
+                <table class="nickname-table">
+                    <thead><tr><th style="width:60px;">STT</th><th>Biệt Danh</th><th>Tên</th><th>Ý Nghĩa Biệt Danh</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td><strong>Big Mouth</strong></td><td>Trâm Anh</td><td>Mồm to nên đặt thế</td></tr>
+                        <tr><td>2</td><td><strong>Eye Spy</strong></td><td>Minh Anh</td><td>Gián điệp một thời của Strawberry và lấy cảm hứng từ thành tựu trong Minecraft</td></tr>
+                        <tr><td>3</td><td><strong>Big Food</strong></td><td>Ngọc Dịu</td><td>Locket toàn đồ ăn</td></tr>
+                        <tr><td>4</td><td><strong>Strange One</strong></td><td>Tiến Dũng</td><td>Nghe tiếng khọt lạ, hôm đi múa mới biết danh tính nên đặt là lạ. Còn nhiều lạ nữa nên là lạ 1. Sau này cải cách chương trình giáo dục chuẩn quốc tế nên thành Strange One</td></tr>
+                        <tr><td>5</td><td><strong>Cream</strong></td><td>Phương Duy</td><td>Biệt danh chắp vá</td></tr>
+                        <tr><td>6</td><td><strong>Sneeze</strong></td><td>Mỹ Duyên</td><td>Thời prime hắt xì streak 10 mấy cái liên tục</td></tr>
+                        <tr><td>7</td><td><strong>Bale</strong></td><td>Quốc Đạt</td><td>Xe đông quá nên đi vòng, phần còn lại là lịch sử</td></tr>
+                        <tr><td>8</td><td><strong>Seven</strong></td><td>Thành Đạt</td><td>Sinh năm 2007 nên là seven</td></tr>
+                        <tr><td>9</td><td><strong>Nine</strong></td><td>Tiến Đạt</td><td>Số thứ tự 9 nên là nine</td></tr>
+                        <tr><td>10</td><td><strong>Six</strong></td><td>Như Đạt</td><td>Anh này "six" vương nên là six</td></tr>
+                        <tr><td>11</td><td><strong>Big Voice</strong></td><td>Ngọc Đức</td><td>Em nào giọng lớn đọc dùm cô đi</td></tr>
+                        <tr><td>12</td><td><strong>Combo A</strong></td><td>Bảo Hà</td><td>A A A A A + giật trước giật sau, giật lên giật xuống</td></tr>
+                        <tr><td>13</td><td><strong>Mystery</strong></td><td>Gia Hân</td><td>Thành viên bí ẩn của lớp</td></tr>
+                        <tr><td>14</td><td><strong>Block</strong></td><td>Ngọc Hiền</td><td>Bị Ta One block</td></tr>
+                        <tr><td>15</td><td><strong>Power</strong></td><td>Bá Hiển</td><td>Khọt lực</td></tr>
+                        <tr><td>16</td><td><strong>Strongbow</strong></td><td>Trọng Hiếu</td><td>Gáy nhiều quá nên đặt là Crow, gáy khỏe gáy mạnh nên đổi thành Strongcrow, khó đọc quá nên cuối cùng là Strongbow</td></tr>
+                        <tr><td>17</td><td><strong>Ta One</strong></td><td>Tuấn Huy</td><td>Trùm ta ( tự ái ), ta nhất lớp nên là one</td></tr>
+                        <tr><td>18</td><td><strong>Exit</strong></td><td>Khánh Huyền</td><td>Người yêu cũ của six = ex six -> exit</td></tr>
+                        <tr><td>19</td><td><strong>Normal</strong></td><td>Đình Khang</td><td>Không thể nào bình thường hơn được nữa</td></tr>
+                        <tr><td>20</td><td><strong>Warm Voice</strong></td><td>Nhật Khang</td><td>Nói chuyện ấm khọt cũng ấm</td></tr>
+                        <tr><td>21</td><td><strong>Min</strong></td><td>Đăng Khoa</td><td>Biệt danh chắp vá</td></tr>
+                        <tr><td>22</td><td><strong>Calm</strong></td><td>Chí Kiên</td><td>Xử lý quá bình tĩnh</td></tr>
+                        <tr><td>23</td><td><strong>Alo</strong></td><td>Thùy Linh</td><td>Không biết phải nói gì hơn</td></tr>
+                        <tr><td>24</td><td><strong>Ta Two</strong></td><td>Trúc Linh</td><td>Hỏi điểm lý Cream xong tự ái, người thứ 2 sau Ta One</td></tr>
+                        <tr><td>25</td><td><strong>Jackson</strong></td><td>Ngọc Minh</td><td>OOOO NICOLAS JACKSON</td></tr>
+                        <tr><td>26</td><td><strong>Handicap</strong></td><td>Đức Minh</td><td>Chơi cờ vua chấp hết tất cả các môn</td></tr>
+                        <tr><td>27</td><td><strong>Boy</strong></td><td>Bảo Nam</td><td>Nam=Boy</td></tr>
+                        <tr><td>28</td><td><strong>Alien</strong></td><td>Bảo Ngọc</td><td>Trùm spam icon alien</td></tr>
+                        <tr><td>29</td><td><strong>Strawberry</strong></td><td>Thành Nhân</td><td>Biệt danh chắp vá</td></tr>
+                        <tr><td>30</td><td><strong>Speed</strong></td><td>Đình Phát</td><td>"Owen icon của t tốc 127 lận đó"</td></tr>
+                        <tr><td>31</td><td><strong>Tommy Gun</strong></td><td>Minh Phương</td><td>Súng tiểu liên viết tắt MP</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details class="category-item" id="team-color">
+        <summary>🎨 Danh Sách Team Color</summary>
+        <div class="category-wrapper">
+            <div class="category-content">
+                <div class="tc-grid">
+                    <div class="tc-card">
+                        <div class="tc-header">
+                            <span class="tc-name">Cá Hộp</span>
+                            <span class="tc-color-tag" style="background: var(--card-border); color: #f43f5e;">3 Members</span>
+                        </div>
+                        <div class="tc-body">
+                            <img class="tc-icon-box" src="https://media.discordapp.net/attachments/1506960977126752426/1507748701198876693/image.png?ex=6a1307e6&is=6a11b666&hm=945e796c81302644675a619591fcf9646f7ede99b178cf11ae02380d6cd70c87&=&format=webp&quality=lossless&width=133&height=107" alt="Cá Hộp">
+                            <div class="tc-desc">Big Bang, Big Mouth, Big Food</div>
+                        </div>
+                        <div class="tc-stats">
+                            <div class="stat-point"><span class="stat-val">+5</span><span class="stat-lab">Ta One</span></div>
+                            <div class="stat-point"><span class="stat-val">+4</span><span class="stat-lab">Thể Thao</span></div>
+                            <div class="stat-point"><span class="stat-val">+5</span><span class="stat-lab">Máu mặt</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details class="category-item" id="bo-chi-so">
+        <summary>📊 Bộ Chỉ Số</summary>
+        <div class="category-wrapper">
+            <div class="category-content">
+                <div class="fut-grid">
+                    <div class="fut-card">
+                        <div class="fut-header">
+                            <div class="fut-ovr-box"><div class="fut-ovr">92</div></div>
+                            <img class="fut-img" src="https://media.discordapp.net/attachments/1489928990041837578/1506302436179181702/image.png?ex=6a0fbf36&is=6a0e6db6&hm=b7eccbe01581359959593aa32e1b4b05247ead6291950f10236d2bb412c71e82&=&format=webp&quality=lossless&width=242&height=261" alt="Thành Nhân">
+                            <div class="fut-name">T. Nhân</div>
+                        </div>
+                        <div class="fut-stats"><div class="fut-stats-grid">
+                            <div class="stat-item"><span class="stat-label">Ta One</span><span class="stat-num">95</span></div>
+                            <div class="stat-item"><span class="stat-label">Body</span><span class="stat-num">82</span></div>
+                            <div class="stat-item"><span class="stat-label">Học vấn</span><span class="stat-num">93</span></div>
+                            <div class="stat-item"><span class="stat-label">Khọt</span><span class="stat-num">40</span></div>
+                            <div class="stat-item"><span class="stat-label">Leo Biên</span><span class="stat-num">85</span></div>
+                            <div class="stat-item"><span class="stat-label">Sport</span><span class="stat-num">89</span></div>
+                        </div></div>
+                        <div class="fut-hidden-traits"><strong>Chỉ số ẩn:</strong> Gánh team thần sầu, Trùm ảo tưởng</div>
+                    </div>
+                    <div class="fut-card">
+                        <div class="fut-header">
+                            <div class="fut-ovr-box"><div class="fut-ovr">88</div></div>
+                            <img class="fut-img" src="https://media.discordapp.net/attachments/1506960977126752426/1506962049589051462/image.png?ex=6a102b46&is=6a0ed9c6&hm=ca4e70e60c35839d69bcea2922d7899d55a460766f0369fe732f36c02bb93197&=&format=webp&quality=lossless&width=292&height=285" alt="Phương Duy">
+                            <div class="fut-name">P. Duy</div>
+                        </div>
+                        <div class="fut-stats"><div class="fut-stats-grid">
+                            <div class="stat-item"><span class="stat-label">Ta One</span><span class="stat-num">89</span></div>
+                            <div class="stat-item"><span class="stat-label">Body</span><span class="stat-num">90</span></div>
+                            <div class="stat-item"><span class="stat-label">Học vấn</span><span class="stat-num">82</span></div>
+                            <div class="stat-item"><span class="stat-label">Khọt</span><span class="stat-num">55</span></div>
+                            <div class="stat-item"><span class="stat-label">Leo Biên</span><span class="stat-num">70</span></div>
+                            <div class="stat-item"><span class="stat-label">Sport</span><span class="stat-num">75</span></div>
+                        </div></div>
+                        <div class="fut-hidden-traits"><strong>Chỉ số ẩn:</strong> Càn quét đồ ăn, Ăn ngủ bùng nổ</div>
+                    </div>
+                    <div class="fut-card">
+                        <div class="fut-header">
+                            <div class="fut-ovr-box"><div class="fut-ovr">92</div></div>
+                            <img class="fut-img" src="https://media.discordapp.net/attachments/1506960977126752426/1506961047053926520/image.png?ex=6a14c797&is=6a137617&hm=c76f9b9f39630212dc629709159d8cabd2cfeb7ce5b95804befb29c10cac1639&=&format=webp&quality=lossless&width=259&height=289" alt="Đình Phát">
+                            <div class="fut-name">Speed</div>
+                        </div>
+                        <div class="fut-stats"><div class="fut-stats-grid">
+                            <div class="stat-item"><span class="stat-label">Ta One</span><span class="stat-num">95</span></div>
+                            <div class="stat-item"><span class="stat-label">Body</span><span class="stat-num">90</span></div>
+                            <div class="stat-item"><span class="stat-label">Học vấn</span><span class="stat-num">80</span></div>
+                            <div class="stat-item"><span class="stat-label">Khọt</span><span class="stat-num">97</span></div>
+                            <div class="stat-item"><span class="stat-label">Leo Biên</span><span class="stat-num">93</span></div>
+                            <div class="stat-item"><span class="stat-label">Sport</span><span class="stat-num">94</span></div>
+                        </div></div>
+                        <div class="fut-hidden-traits"><strong>Chỉ số ẩn:</strong> Đa năng hấp thụ, Dọn sạch bàn tiệc</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details class="category-item" id="album">
+        <summary>📸 Album Kỷ Niệm Năm 2026</summary>
+        <div class="category-wrapper">
+            <div class="category-content">
+                <!-- NÚT TẢI ẢNH VÀ NƠI HIỂN THỊ -->
+                <label for="image-upload" style="display:block; padding: 20px; border: 2px dashed #db2777; border-radius: 12px; text-align: center; cursor: pointer; color: #db2777; margin: 15px 0;">+ Thêm ảnh</label>
+                <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                <div id="album-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding-bottom: 20px;"></div>
+            </div>
+        </div>
+    </details>
+
+<!-- =====================================================
+     FIREBASE CONFIG
+     Tạo project tại: https://console.firebase.google.com
+     Bật: Realtime Database (chọn "Start in test mode")
+     Bật: Storage (để lưu avatar base64 - dùng URL thay thế)
+     Sau đó thay thế các giá trị bên dưới bằng config của bạn
+===================================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ⚠️ THAY THẾ PHẦN NÀY BẰNG CONFIG FIREBASE CỦA BẠN
+const firebaseConfig = {
+    apiKey: "AIzaSyBHkFNH4jsf84W1c4W10jgrHl3VC-01q9o",
+    authDomain: "to-web-95eb6.firebaseapp.com",
+    databaseURL: "https://to-web-95eb6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "to-web-95eb6",
+    storageBucket: "to-web-95eb6.firebasestorage.app",
+    messagingSenderId: "732514479290",
+    appId: "1:732514479290:web:bf309322f1e4e24c12a683",
+    measurementId: "G-2MHQGL9PRY"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ====================================================
+// USERS
+// ====================================================
+const SYSTEM_VALID_USERS = {
+    "Newbie": "11042008","Alien": "09022008","Speed": "19022008",
+    "Strawberry": "30092008","Sharp": "21082008","Cao Palmer": "09072008","Cream": "13112008"
+};
+let currentActiveUser = null;
+
+// ====================================================
+// PROFILE (Firebase: /profiles/{username})
+// ====================================================
+const profileCache = {};  // local cache để tránh gọi Firebase liên tục
+
+async function getProfile(username) {
+    if (profileCache[username]) return profileCache[username];
+    const snap = await get(ref(db, `profiles/${username}`));
+    const val = snap.exists() ? snap.val() : {};
+    profileCache[username] = val;
+    return val;
+}
+async function saveProfile(username, data) {
+    const existing = await getProfile(username);
+    const merged = { ...existing, ...data };
+    profileCache[username] = merged;
+    await set(ref(db, `profiles/${username}`), merged);
+    // Broadcast update đến badge & chat
+    window.dispatchEvent(new CustomEvent('profile-updated', { detail: { username } }));
+}
+function getDefaultAvatar(u) { return `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(u)}`; }
+async function getUserAvatar(u) { const p = await getProfile(u); return p.avatar || getDefaultAvatar(u); }
+async function getUserBio(u)    { const p = await getProfile(u); return p.bio || ""; }
+
+// Invalidate cache khi có thay đổi từ Firebase
+onValue(ref(db, 'profiles'), (snap) => {
+    const data = snap.val() || {};
+    Object.assign(profileCache, data);
+    if (currentActiveUser) refreshProfileUI();
+});
+
+// ====================================================
+// REFRESH PROFILE UI
+// ====================================================
+async function refreshProfileUI() {
+    if (!currentActiveUser) return;
+    const avatar = await getUserAvatar(currentActiveUser);
+    const bio    = await getUserBio(currentActiveUser);
+    const floatAv = document.getElementById("profile-float-avatar");
+    if (floatAv) floatAv.src = avatar;
+    const pillName = document.getElementById("profile-pill-name");
+    if (pillName) pillName.textContent = currentActiveUser;
+    const chatAv = document.getElementById("chat-header-avatar");
+    if (chatAv) chatAv.src = avatar;
+    const chatBio = document.getElementById("chat-header-bio");
+    if (chatBio) chatBio.textContent = bio ? `"${bio}"` : "";
+    renderSystemMessages();
+}
+
+// ====================================================
+// PROFILE MODAL
+// ====================================================
+async function openProfileModal() {
+    if (!currentActiveUser) return;
+    const profile = await getProfile(currentActiveUser);
+    document.getElementById("profile-display-username").textContent = currentActiveUser;
+    document.getElementById("profile-avatar-preview").src = profile.avatar || getDefaultAvatar(currentActiveUser);
+    document.getElementById("profile-bio-input").value = profile.bio || "";
+    document.getElementById("profile-avatar-url-input").value = "";
+    updateBioCount();
+    document.getElementById("profile-modal-overlay").classList.add("is-open");
+}
+function closeProfileModal() { document.getElementById("profile-modal-overlay").classList.remove("is-open"); }
+function handleProfileOverlayClick(e) { if (e.target === document.getElementById("profile-modal-overlay")) closeProfileModal(); }
+window.openProfileModal = openProfileModal;
+window.closeProfileModal = closeProfileModal;
+window.handleProfileOverlayClick = handleProfileOverlayClick;
+
+function switchAvatarTab(tab, btn) {
+    document.querySelectorAll(".avatar-tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".avatar-tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(`avatar-tab-${tab}`).classList.add("active");
+}
+window.switchAvatarTab = switchAvatarTab;
+
+function handleAvatarFileChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { alert("Vui lòng chọn file ảnh hợp lệ!"); return; }
+    if (file.size > 2*1024*1024) { alert("Ảnh không được vượt quá 2MB!"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => { document.getElementById("profile-avatar-preview").src = e.target.result; };
+    reader.readAsDataURL(file);
+}
+window.handleAvatarFileChange = handleAvatarFileChange;
+
+function applyAvatarUrl() {
+    const url = document.getElementById("profile-avatar-url-input").value.trim();
+    if (!url) return;
+    const preview = document.getElementById("profile-avatar-preview");
+    const testImg = new Image();
+    testImg.onload = () => { preview.src = url; };
+    testImg.onerror = () => { alert("URL không hợp lệ hoặc ảnh không tải được!"); };
+    testImg.src = url;
+}
+window.applyAvatarUrl = applyAvatarUrl;
+
+function updateBioCount() {
+    const ta  = document.getElementById("profile-bio-input");
+    const cnt = document.getElementById("profile-bio-count");
+    const len = ta.value.length;
+    cnt.textContent = `${len} / 120`;
+    cnt.className = "profile-char-count" + (len >= 120 ? " over" : len >= 90 ? " warn" : "");
+}
+window.updateBioCount = updateBioCount;
+
+async function saveProfileData() {
+    const avatar = document.getElementById("profile-avatar-preview").src;
+    const bio    = document.getElementById("profile-bio-input").value.trim();
+    await saveProfile(currentActiveUser, { avatar, bio });
+    await refreshProfileUI();
+    const toast = document.getElementById("profile-save-toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+}
+window.saveProfileData = saveProfileData;
+
+// ====================================================
+// MINI PROFILE POPUP
+// ====================================================
+async function openMiniProfile(username) {
+    if (username === currentActiveUser) { openProfileModal(); return; }
+    const avatar = await getUserAvatar(username);
+    const bio    = await getUserBio(username);
+    document.getElementById("mini-profile-avatar").src = avatar;
+    document.getElementById("mini-profile-username").textContent = username;
+    document.getElementById("mini-profile-bio").textContent = bio ? `"${bio}"` : "";
+    document.getElementById("mini-profile-hint").textContent = bio ? "Trang cá nhân của " + username : "Người này chưa có bio 👻";
+    document.getElementById("mini-profile-overlay").classList.add("is-open");
+}
+function closeMiniProfile() { document.getElementById("mini-profile-overlay").classList.remove("is-open"); }
+function handleMiniProfileOverlayClick(e) { if (e.target === document.getElementById("mini-profile-overlay")) closeMiniProfile(); }
+window.closeMiniProfile = closeMiniProfile;
+window.handleMiniProfileOverlayClick = handleMiniProfileOverlayClick;
+
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeProfileModal(); closeMiniProfile(); } });
+
+// ====================================================
+// BADGE (dùng lastReadCount lưu trong sessionStorage vì là per-device)
+// ====================================================
+let badgePollUnsubscribe = null;
+let chatMessagesCount = 0;
+
+function getLastReadCount() {
+    if (!currentActiveUser) return 0;
+    return parseInt(sessionStorage.getItem(`last_read_${currentActiveUser}`) || "0");
+}
+function setLastReadCount(count) {
+    if (!currentActiveUser) return;
+    sessionStorage.setItem(`last_read_${currentActiveUser}`, count.toString());
+}
+function updateUnreadBadge(count) {
+    const badge = document.getElementById("unread-badge");
+    if (!badge) return;
+    const prevCount = parseInt(badge.textContent) || 0;
+    if (count <= 0) { badge.classList.remove("visible"); badge.textContent = "0"; }
+    else {
+        badge.textContent = count > 99 ? "99+" : count;
+        if (!badge.classList.contains("visible")) badge.classList.add("visible");
+        if (count > prevCount) {
+            badge.classList.remove("pop"); void badge.offsetWidth; badge.classList.add("pop");
+            badge.addEventListener("animationend", () => badge.classList.remove("pop"), { once: true });
+        }
+    }
+}
+
+// ====================================================
+// CHAT (Firebase: /chat_messages)
+// ====================================================
+let chatHistoryCache = [];
+
+function escapeSystemHTML(str) {
+    return str.replace(/[&<>'"]/g, tag => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[tag] || tag));
+}
+
+async function renderSystemMessages() {
+    const chatBox = document.getElementById("sys-chat-messages");
+    if (!chatBox) return;
+    const history = chatHistoryCache;
+    chatBox.innerHTML = "";
+    for (const msg of history) {
+        const isMe = msg.sender === currentActiveUser;
+        const senderAvatar = (profileCache[msg.sender] && profileCache[msg.sender].avatar)
+            ? profileCache[msg.sender].avatar
+            : getDefaultAvatar(msg.sender);
+        const wrapDiv = document.createElement("div");
+        wrapDiv.className = `chat-msg-row-wrap ${isMe ? 'wrap-me' : ''}`;
+        const avatarImg = document.createElement("img");
+        avatarImg.className = "chat-msg-avatar";
+        avatarImg.src = senderAvatar;
+        avatarImg.alt = msg.sender;
+        avatarImg.title = isMe ? "Chỉnh sửa hồ sơ của tôi" : `Xem profile ${msg.sender}`;
+        avatarImg.addEventListener("click", (e) => { e.stopPropagation(); openMiniProfile(msg.sender); });
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `chat-msg-row ${isMe ? 'type-me' : 'type-other'}`;
+        msgDiv.innerHTML = `<div class="msg-sender-name">${escapeSystemHTML(msg.sender)}</div><div>${escapeSystemHTML(msg.content)}</div>`;
+        wrapDiv.appendChild(avatarImg);
+        wrapDiv.appendChild(msgDiv);
+        chatBox.appendChild(wrapDiv);
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function sendSystemMessage() {
+    const msgInp = document.getElementById("sys-message-input");
+    const text   = msgInp.value.trim();
+    if (!text || !currentActiveUser) return;
+    msgInp.value = "";
+    await push(ref(db, 'chat_messages'), {
+        sender:    currentActiveUser,
+        content:   text,
+        timestamp: Date.now()
+    });
+}
+function handleSysKeyPress(event) { if (event.key === "Enter") sendSystemMessage(); }
+window.sendSystemMessage = sendSystemMessage;
+window.handleSysKeyPress = handleSysKeyPress;
+
+function startRealtimeChat() {
+    onValue(ref(db, 'chat_messages'), (snap) => {
+        const data = snap.val() || {};
+        chatHistoryCache = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+        chatMessagesCount = chatHistoryCache.length;
+        const chatOpen = document.getElementById("sys-chat-popup").classList.contains("is-active");
+        if (chatOpen) {
+            setLastReadCount(chatMessagesCount);
+            updateUnreadBadge(0);
+            renderSystemMessages();
+        } else {
+            const unread = chatMessagesCount - getLastReadCount();
+            updateUnreadBadge(Math.max(0, unread));
+        }
+    });
+}
+
+// ====================================================
+// CHAT POPUP TOGGLE
+// ====================================================
+function toggleChatPopup() {
+    if (document.getElementById("sys-main-content").classList.contains("hidden-system")) return;
+    const chatPopup = document.getElementById("sys-chat-popup");
+    const isOpening = !chatPopup.classList.contains("is-active");
+    if (isOpening) {
+        chatPopup.classList.add("is-active");
+        setLastReadCount(chatMessagesCount);
+        updateUnreadBadge(0);
+        setTimeout(renderSystemMessages, 50);
+    } else {
+        chatPopup.classList.remove("is-active");
+    }
+}
+window.toggleChatPopup = toggleChatPopup;
+
+// ====================================================
+// DARK MODE (localStorage ok vì là preference cá nhân máy)
+// ====================================================
+const themeToggleBtn = document.getElementById('theme-toggle');
+const currentTheme   = localStorage.getItem('theme');
+if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    if (currentTheme === 'dark') themeToggleBtn.textContent = '☀️';
+}
+themeToggleBtn.addEventListener('click', () => {
+    let theme = document.documentElement.getAttribute('data-theme') !== 'dark' ? 'dark' : 'light';
+    themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+});
+
+// ====================================================
+// LOGIN / LOGOUT
+// ====================================================
+window.addEventListener('load', () => {
+    const loader = document.getElementById('loading-screen');
+    setTimeout(() => { loader.classList.add('fade-out'); checkSystemSession(); }, 800);
+});
+
+function checkSystemSession() {
+    const savedUser = sessionStorage.getItem("active_sys_user");
+    if (savedUser && SYSTEM_VALID_USERS[savedUser]) enterSystemDashboard(savedUser);
+}
+
+function handleSystemLogin() {
+    const userInp = document.getElementById("sys-username").value.trim();
+    const passInp = document.getElementById("sys-password").value.trim();
+    const errDiv  = document.getElementById("sys-error-message");
+    if (SYSTEM_VALID_USERS[userInp] && SYSTEM_VALID_USERS[userInp] === passInp) {
+        errDiv.innerText = "";
+        sessionStorage.setItem("active_sys_user", userInp);
+        enterSystemDashboard(userInp);
+    } else { errDiv.innerText = "Tên tài khoản hoặc mật khẩu không đúng!"; }
+}
+window.handleSystemLogin = handleSystemLogin;
+
+async function enterSystemDashboard(username) {
+    currentActiveUser = username;
+    document.getElementById("sys-login-screen").classList.add("hidden-system");
+    document.getElementById("sys-main-content").classList.remove("hidden-system");
+    document.getElementById("sys-welcome-user").innerText = username;
+    document.getElementById("chat-toggle-wrapper").classList.remove("hidden-system");
+    document.getElementById("profile-toggle-wrapper").classList.remove("hidden-system");
+    startRealtimeChat();
+    await refreshProfileUI();
+}
+
+function handleSystemLogout() {
+    sessionStorage.removeItem("active_sys_user");
+    currentActiveUser = null;
+    chatHistoryCache = [];
+    document.getElementById("sys-main-content").classList.add("hidden-system");
+    document.getElementById("sys-login-screen").classList.remove("hidden-system");
+    document.getElementById("sys-username").value = "";
+    document.getElementById("sys-password").value = "";
+    document.getElementById("chat-toggle-wrapper").classList.add("hidden-system");
+    document.getElementById("profile-toggle-wrapper").classList.add("hidden-system");
+    document.getElementById("sys-chat-popup").classList.remove("is-active");
+    closeProfileModal(); closeMiniProfile();
+    updateUnreadBadge(0);
+}
+window.handleSystemLogout = handleSystemLogout;
+
+// ====================================================
+// ACCORDION
+// ====================================================
+function openSectionSmoothly(section) {
+    const wrapper = section.querySelector('.category-wrapper');
+    const content = section.querySelector('.category-content');
+    section.setAttribute('open',''); section.classList.add('is-open');
+    wrapper.style.gridTemplateRows = '1fr'; content.style.opacity = '1'; content.style.transform = 'translateY(0)';
+}
+function closeSectionSmoothly(section) {
+    const wrapper = section.querySelector('.category-wrapper');
+    const content = section.querySelector('.category-content');
+    section.classList.remove('is-open'); wrapper.style.gridTemplateRows = '0fr';
+    content.style.opacity = '0'; content.style.transform = 'translateY(-10px)';
+    setTimeout(() => { if (!section.classList.contains('is-open')) { section.removeAttribute('open'); wrapper.style.gridTemplateRows = ''; } }, 400);
+}
+document.querySelectorAll('.category-item').forEach(section => {
+    section.querySelector('summary').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!section.hasAttribute('open')) openSectionSmoothly(section);
+        else closeSectionSmoothly(section);
+    });
+});
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetSection = document.querySelector(this.getAttribute('href'));
+        if (targetSection) {
+            if (targetSection.classList.contains('member-section')) targetSection.scrollIntoView({ behavior:'smooth', block:'start' });
+            else { openSectionSmoothly(targetSection); setTimeout(() => targetSection.scrollIntoView({ behavior:'smooth', block:'start' }), 50); }
+        }
+    });
+});
+</script>
+<div id="lightbox" onclick="this.style.display='none'"><img id="lightbox-img" src=""></div>
+
+<script>
+document.getElementById('image-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.className = 'album-img';
+            img.onclick = function() {
+                document.getElementById('lightbox-img').src = this.src;
+                document.getElementById('lightbox').style.display = 'flex';
+            };
+            document.getElementById('album-grid').appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+</body>
+</html>

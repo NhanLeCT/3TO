@@ -7,21 +7,14 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         :root {
-            --bg-color: #fff1f2; --bg-image: url('image_bbe169.png'); --bg-filter: none;
+            --bg-color: #fff1f2; --bg-image: url('image_bbe169.png');
             --text-main: #4c1d95; --text-muted: #9d174d; --text-desc: #6b21a8;
             --card-bg: rgba(255,255,255,0.65); --card-sub-bg: rgba(255,245,245,0.7);
             --card-border: rgba(255,228,230,0.8); --content-bg: rgba(255,251,251,0.75);
             --popup-bg: #ffffff; --toggle-bg: #db2777; --toggle-color: #ffffff;
             --glass-blur: blur(12px); --dot-glow: rgba(251,113,133,0.15);
         }
-        [data-theme="dark"] {
-            --bg-color: #0f172a; --bg-filter: invert(1) hue-rotate(180deg) brightness(0.4) contrast(1.2);
-            --text-main: #f8fafc; --text-muted: #fda4af; --text-desc: #d8b4fe;
-            --card-bg: rgba(30,41,59,0.75); --card-sub-bg: rgba(15,23,42,0.8);
-            --card-border: rgba(51,65,85,0.6); --content-bg: rgba(17,24,39,0.8);
-            --popup-bg: #1e293b; --toggle-bg: #f59e0b; --toggle-color: #0f172a;
-            --dot-glow: rgba(0,0,0,0.4);
-        }
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-color); }
         ::-webkit-scrollbar-thumb { background: #db2777; border-radius: 999px; }
@@ -34,7 +27,7 @@
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: var(--bg-image); background-repeat: repeat; background-size: 350px;
-            filter: var(--bg-filter); z-index: -1; transition: filter 0.5s ease;
+            filter: none; z-index: -1;
         }
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -45,7 +38,7 @@
         #loading-screen::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: var(--bg-image); background-repeat: repeat; background-size: 350px;
-            filter: var(--bg-filter); z-index: -1;
+            filter: none; z-index: -1;
         }
         #loading-screen.fade-out { opacity: 0; visibility: hidden; }
         .loading-title {
@@ -234,6 +227,10 @@
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         #biet-danh, #team-color, #bo-chi-so, #album { scroll-margin-top: 30px; }
+        .album-section-title {
+            padding: 20px 24px; font-size: 18px; font-weight: 700; color: var(--text-main);
+            position: relative; z-index: 2;
+        }
         .category-item summary {
             padding: 20px 24px; font-size: 18px; font-weight: 700; color: var(--text-main);
             cursor: pointer; list-style: none;
@@ -1156,12 +1153,6 @@
     gap: 5px;
     opacity: 0.92;
 }
-/* Tương phản tốt cho dark */
-[data-theme="dark"] .chat-msg-recalled {
-    border-color: rgba(148,163,184,0.4);
-    background: rgba(30,41,59,0.6);
-    color: rgba(248,250,252,0.55);
-}
 .chat-msg-recalled-icon {
     font-size: 12px;
     opacity: 0.7;
@@ -1199,7 +1190,6 @@
         <button class="floating-btn" id="chat-toggle-btn" title="Mở phòng chat" onclick="toggleChatPopup()">💬</button>
         <span class="unread-badge" id="unread-badge">0</span>
     </div>
-    <button class="floating-btn" id="theme-toggle" title="Thay đổi giao diện">🌙</button>
 </div>
 
 <!-- PROFILE PILL BUTTON - góc trên trái -->
@@ -1599,10 +1589,10 @@
         </div>
     </details>
 
-    <details class="category-item" id="album">
-        <summary>📸 Album Kỷ Niệm</summary>
-        <div class="category-wrapper">
-            <div class="category-content" id="album-content-wrap">
+    <div class="category-item is-open" id="album">
+        <div class="album-section-title">📸 Album Kỷ Niệm</div>
+        <div class="category-wrapper" style="grid-template-rows:1fr;">
+            <div class="category-content" id="album-content-wrap" style="opacity:1;transform:translateY(0);padding-bottom:24px;">
                 <!-- UPLOAD AREA -->
                 <div id="album-post-composer" style="padding-top:18px;">
                     <input type="file" id="album-file-input" accept="image/*" multiple style="display:none;" onchange="handleAlbumFileSelect(event)">
@@ -1623,7 +1613,7 @@
                 </div>
             </div>
         </div>
-    </details>
+    </div>
 
 <!-- =====================================================
      FIREBASE CONFIG
@@ -1984,7 +1974,12 @@ function updateModalImage(images) {
     const idx = window._albumModalImgIdx;
     const photo = document.getElementById('album-modal-photo');
     photo.style.opacity = '0';
-    setTimeout(() => { photo.src = images[idx]; photo.style.opacity = '1'; }, 150);
+    photo.src = '';
+    const newSrc = images[idx];
+    const img = new Image();
+    img.onload = () => { photo.src = newSrc; photo.style.opacity = '1'; };
+    img.onerror = () => { photo.src = newSrc; photo.style.opacity = '1'; };
+    img.src = newSrc;
     // update dots
     const dotsEl = document.getElementById('album-modal-dots');
     dotsEl.innerHTML = images.map((_, i) =>
@@ -2513,22 +2508,6 @@ function toggleChatPopup() {
     }
 }
 window.toggleChatPopup = toggleChatPopup;
-
-// ====================================================
-// DARK MODE (localStorage ok vì là preference cá nhân máy)
-// ====================================================
-const themeToggleBtn = document.getElementById('theme-toggle');
-const currentTheme   = localStorage.getItem('theme');
-if (currentTheme) {
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    if (currentTheme === 'dark') themeToggleBtn.textContent = '☀️';
-}
-themeToggleBtn.addEventListener('click', () => {
-    let theme = document.documentElement.getAttribute('data-theme') !== 'dark' ? 'dark' : 'light';
-    themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-});
 
 // ====================================================
 // LOGIN / LOGOUT

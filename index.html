@@ -197,6 +197,7 @@
         .member-name { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.3s ease; }
         .member-role { font-size: 11px; color: var(--text-muted); background-color: var(--card-border); padding: 2px 8px; border-radius: 9999px; display: inline-block; transition: all 0.3s ease; }
         .member-card:hover .member-role { background-color: #f43f5e; color: #fff; }
+        .member-username { font-size: 10px; color: #db2777; font-weight: 700; margin-bottom: 4px; opacity: 0.8; letter-spacing: 0.3px; }
 
         .member-profile-popup {
             position: absolute; bottom: 110%; left: 50%;
@@ -1013,9 +1014,10 @@
     <div class="member-section" id="thanh-vien">
         <p class="member-title">👥 Thành Viên</p>
         <div class="member-grid">
-            <div class="member-card">
+            <div class="member-card" data-username="Strawberry">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1508329222303780965/Screenshot_2026-05-25_113931.png?ex=6a16760d&is=6a15248d&hm=2ebaaf692065a77d2278bbc929038166492400a4bdbacfed023bced7890d6939&=&format=webp&quality=lossless&width=609&height=556" alt="Thành viên">
                 <p class="member-name">Thành Nhân</p>
+                <p class="member-username">@Strawberry</p>
                 <span class="member-role">Strawberry</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -1027,9 +1029,10 @@
                     </div>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-username="Cream">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506962049589051462/image.png?ex=6a16c2c6&is=6a157146&hm=0d29822fa9796700332c66f0024fcfd59d983f259486ae1022718a01fe348fd5&=&format=webp&quality=lossless&width=292&height=285" alt="Thành viên">
                 <p class="member-name">Phương Duy</p>
+                <p class="member-username">@Cream</p>
                 <span class="member-role">Cream</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -1041,9 +1044,10 @@
                     </div>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-username="Speed">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506961047053926520/image.png?ex=6a16c1d7&is=6a157057&hm=feb512f9b2365bd52ad0b33a134ea042eafc726ab3304b047338c5ae687d7467&=&format=webp&quality=lossless&width=259&height=289" alt="Thành viên">
                 <p class="member-name">Đình Phát</p>
+                <p class="member-username">@Speed</p>
                 <span class="member-role">Speed</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -1055,9 +1059,10 @@
                     </div>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-username="Cao Palmer">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506962209631375490/691405557_2114587245785143_8485165994705541429_n.png?ex=6a16c2ec&is=6a15716c&hm=c9a2a2dea9ebddfc8622dbccf94b3f093c0517a31e3524500974990e140f401a&=&format=webp&quality=lossless&width=756&height=682" alt="Thành viên">
                 <p class="member-name">Đức Thịnh</p>
+                <p class="member-username">@Cao Palmer</p>
                 <span class="member-role">Cao Palmer</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -1069,9 +1074,10 @@
                     </div>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-username="Sharp">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1506961708898455673/image.png?ex=6a16c275&is=6a1570f5&hm=ddf96b70c3456d24bec2615773dc6e5e086ccfd937e29dd1c5a0aed72b7ae966&=&format=webp&quality=lossless&width=436&height=447" alt="Thành viên">
                 <p class="member-name">Quốc Việt</p>
+                <p class="member-username">@Sharp</p>
                 <span class="member-role">Sharp</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -1083,9 +1089,10 @@
                     </div>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-username="Alien">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1509041474778693803/image.png?ex=6a17bbe4&is=6a166a64&hm=6f17ecce9f8b645f54cdbcaa9a3a9d438653fa4acee5c63c1dfd03c34bf9380e&=&format=webp&quality=lossless&width=356&height=370" alt="Thành viên">
                 <p class="member-name">Bảo Ngọc</p>
+                <p class="member-username">@Alien</p>
                 <span class="member-role">Alien</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -1097,9 +1104,10 @@
                     </div>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-username="Newbie">
                 <img class="member-avatar" src="https://media.discordapp.net/attachments/1506960977126752426/1509041069583765504/image.png?ex=6a17bb83&is=6a166a03&hm=7e65425911456a72262fd605fb6554d311a7706226e6c235e544b25a65e33b51&=&format=webp&quality=lossless&width=704&height=770" alt="Song Yên">
                 <p class="member-name">Song Yên</p>
+                <p class="member-username">@Newbie</p>
                 <span class="member-role">Newbie</span>
                 <div class="member-profile-popup">
                     <p class="profile-title">✨ PROFILE</p>
@@ -2033,16 +2041,14 @@ document.querySelectorAll('.nav-link').forEach(link => {
 document.querySelectorAll('.member-card').forEach(card => {
     const avatar = card.querySelector('.member-avatar');
     const nameEl = card.querySelector('.member-name');
-    // Get member name from the popup or name element
-    const getMemberUsername = () => {
-        // try to find the matching system user by name
-        const displayName = nameEl ? nameEl.textContent.trim() : '';
-        return displayName;
+    const getCardUsername = () => {
+        // Ưu tiên data-username (tên acc), fallback về tên hiển thị
+        return card.dataset.username || (nameEl ? nameEl.textContent.trim() : '');
     };
     const openCardProfile = (e) => {
         e.stopPropagation();
-        const name = getMemberUsername();
-        if (name && typeof openMiniProfile === 'function') openMiniProfile(name);
+        const username = getCardUsername();
+        if (username && typeof openMiniProfile === 'function') openMiniProfile(username);
     };
     if (avatar) { avatar.style.cursor = 'pointer'; avatar.addEventListener('click', openCardProfile); }
     if (nameEl) { nameEl.style.cursor = 'pointer'; nameEl.addEventListener('click', openCardProfile); }

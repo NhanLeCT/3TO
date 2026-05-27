@@ -523,6 +523,64 @@
     transform: translateY(-2px);
 }
 
+/* ====================================================
+   AUDIO CALL
+==================================================== */
+.call-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; background: rgba(219,39,119,0.08);
+    border-bottom: 1px solid var(--card-border);
+    min-height: 42px; flex-shrink: 0;
+    transition: background 0.3s;
+}
+.call-bar.in-call { background: rgba(16,185,129,0.12); }
+.call-bar-info { flex: 1; min-width: 0; }
+.call-bar-title {
+    font-size: 12px; font-weight: 800; color: #db2777;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.call-bar.in-call .call-bar-title { color: #059669; }
+.call-bar-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.call-bar-avatars {
+    display: flex; align-items: center; gap: -4px; margin-right: 4px;
+}
+.call-bar-avatar {
+    width: 22px; height: 22px; border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--card-bg); margin-left: -5px; flex-shrink: 0;
+    transition: transform 0.2s;
+}
+.call-bar-avatar:first-child { margin-left: 0; }
+.call-bar-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; flex-shrink: 0;
+    transition: all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.call-bar-btn:hover { transform: scale(1.12); }
+.call-btn-join {
+    background: linear-gradient(135deg,#10b981,#059669); color: #fff;
+    box-shadow: 0 2px 8px rgba(16,185,129,0.4);
+    width: auto; padding: 0 10px; border-radius: 14px; font-size: 11px; font-weight: 800; height: 28px;
+}
+.call-btn-join:hover { box-shadow: 0 4px 12px rgba(16,185,129,0.55); }
+.call-btn-mic { background: var(--card-sub-bg); color: var(--text-main); border: 1px solid var(--card-border); }
+.call-btn-mic.muted { background: rgba(225,29,72,0.12); color: #e11d48; border-color: rgba(225,29,72,0.35); }
+.call-btn-end { background: #e11d48; color: #fff; box-shadow: 0 2px 8px rgba(225,29,72,0.4); }
+.call-btn-end:hover { background: #be123c; box-shadow: 0 4px 12px rgba(225,29,72,0.55); }
+.call-btn-start {
+    background: linear-gradient(135deg,#db2777,#f43f5e); color: #fff;
+    box-shadow: 0 2px 8px rgba(219,39,119,0.35);
+}
+.call-btn-start:hover { box-shadow: 0 4px 12px rgba(219,39,119,0.5); }
+@keyframes callPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+    50% { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
+}
+.call-live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #10b981;
+    animation: callPulse 1.5s infinite; flex-shrink: 0;
+}
+.call-timer { font-size: 11px; font-weight: 700; color: #059669; font-variant-numeric: tabular-nums; }
 
 /* ====================================================
    ALBUM - MULTI-IMAGE UPLOAD PREVIEW (Messenger-style)
@@ -963,6 +1021,22 @@
 
 <div class="chat-popup-window" id="sys-chat-popup">
     <div class="chat-box-layout">
+        <!-- CALL BAR -->
+        <div class="call-bar" id="call-bar">
+            <div class="call-bar-avatars" id="call-avatars"></div>
+            <div class="call-bar-info">
+                <div class="call-bar-title" id="call-bar-title">☎️ Gọi điện nhóm</div>
+                <div class="call-bar-sub" id="call-bar-sub">Bấm 📞 để bắt đầu</div>
+            </div>
+            <!-- state: idle -->
+            <button class="call-bar-btn call-btn-start" id="call-btn-start" title="Bắt đầu gọi" onclick="startCall()">📞</button>
+            <!-- state: active (others can join) -->
+            <button class="call-bar-btn call-btn-join" id="call-btn-join" style="display:none" onclick="joinCall()">Tham gia</button>
+            <button class="call-bar-btn call-btn-mic" id="call-btn-mic" style="display:none" title="Tắt/bật mic" onclick="toggleMic()">🎙️</button>
+            <button class="call-bar-btn call-btn-end" id="call-btn-end" style="display:none" title="Kết thúc cuộc gọi" onclick="leaveCall()">📵</button>
+            <div class="call-live-dot" id="call-live-dot" style="display:none"></div>
+            <span class="call-timer" id="call-timer" style="display:none">0:00</span>
+        </div>
         <div class="chat-box-header">
             <div style="display:flex;align-items:center;gap:10px;min-width:0;">
                 <img id="chat-header-avatar" class="chat-header-avatar" src="https://api.dicebear.com/7.x/thumbs/svg?seed=default" alt="avatar" onclick="openProfileModal()" title="Chỉnh hồ sơ" style="cursor:pointer;">
@@ -1982,6 +2056,7 @@ async function enterSystemDashboard(username) {
     document.getElementById("chat-toggle-wrapper").classList.remove("hidden-system");
     document.getElementById("profile-toggle-wrapper").classList.remove("hidden-system");
     startRealtimeChat();
+    startCallSignaling();
     await refreshProfileUI();
 }
 
@@ -1989,6 +2064,7 @@ function handleSystemLogout() {
     sessionStorage.removeItem("active_sys_user");
     currentActiveUser = null;
     chatHistoryCache = [];
+    if (typeof cleanupCall === 'function') cleanupCall();
     document.getElementById("sys-main-content").classList.add("hidden-system");
     document.getElementById("sys-login-screen").classList.remove("hidden-system");
     document.getElementById("sys-username").value = "";
@@ -2000,6 +2076,313 @@ function handleSystemLogout() {
     updateUnreadBadge(0);
 }
 window.handleSystemLogout = handleSystemLogout;
+
+// ====================================================
+// AUDIO CALL - WebRTC + Firebase signaling
+// ====================================================
+// Firebase path: /call_room  (single global room)
+// Schema:
+//   active: bool
+//   startedBy: username
+//   startedAt: ts
+//   participants: { username: { joinedAt } }
+//   offers: { fromUser: { sdp } }
+//   answers: { fromUser_toUser: { sdp } }
+//   iceCandidates: { fromUser_toUser_idx: { candidate } }
+
+const CALL_REF = 'call_room';
+let callState = 'idle'; // idle | active-notjoined | in-call
+let localStream = null;
+let peerConnections = {}; // { username: RTCPeerConnection }
+let callTimerInterval = null;
+let callStartTime = 0;
+let myCallParticipant = false;
+let callUnsubscribers = [];
+
+const iceConfig = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
+
+function callFmt(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function updateCallBar() {
+    const bar = document.getElementById('call-bar');
+    const titleEl = document.getElementById('call-bar-title');
+    const subEl = document.getElementById('call-bar-sub');
+    const btnStart = document.getElementById('call-btn-start');
+    const btnJoin = document.getElementById('call-btn-join');
+    const btnMic = document.getElementById('call-btn-mic');
+    const btnEnd = document.getElementById('call-btn-end');
+    const dot = document.getElementById('call-live-dot');
+    const timer = document.getElementById('call-timer');
+
+    if (callState === 'idle') {
+        bar.classList.remove('in-call');
+        titleEl.textContent = '☎️ Gọi điện nhóm';
+        subEl.textContent = 'Bấm 📞 để bắt đầu';
+        btnStart.style.display = ''; btnJoin.style.display = 'none';
+        btnMic.style.display = 'none'; btnEnd.style.display = 'none';
+        dot.style.display = 'none'; timer.style.display = 'none';
+    } else if (callState === 'active-notjoined') {
+        bar.classList.remove('in-call');
+        titleEl.textContent = '🔔 Đang có cuộc gọi...';
+        subEl.textContent = 'Bấm Tham gia để vào';
+        btnStart.style.display = 'none'; btnJoin.style.display = '';
+        btnMic.style.display = 'none'; btnEnd.style.display = 'none';
+        dot.style.display = ''; timer.style.display = 'none';
+    } else if (callState === 'in-call') {
+        bar.classList.add('in-call');
+        titleEl.textContent = '🎙️ Đang trong cuộc gọi';
+        subEl.textContent = '';
+        btnStart.style.display = 'none'; btnJoin.style.display = 'none';
+        btnMic.style.display = ''; btnEnd.style.display = '';
+        dot.style.display = ''; timer.style.display = '';
+    }
+}
+
+function updateCallAvatars(participants) {
+    const container = document.getElementById('call-avatars');
+    if (!container) return;
+    const names = Object.keys(participants || {}).slice(0, 5);
+    container.innerHTML = names.map(name => {
+        const av = (profileCache[name] && profileCache[name].avatar) ? profileCache[name].avatar : getDefaultAvatar(name);
+        return `<img class="call-bar-avatar" src="${av}" alt="${escapeSystemHTML(name)}" title="${escapeSystemHTML(name)}">`;
+    }).join('');
+}
+
+async function startCall() {
+    if (!currentActiveUser) return;
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    } catch(e) { alert('Không thể truy cập mic! Vui lòng cấp quyền micro.'); return; }
+
+    const now = Date.now();
+    await set(ref(db, CALL_REF), {
+        active: true,
+        startedBy: currentActiveUser,
+        startedAt: now,
+        participants: { [currentActiveUser]: { joinedAt: now } }
+    });
+    callState = 'in-call';
+    myCallParticipant = true;
+    callStartTime = now;
+    startCallTimer();
+    updateCallBar();
+}
+window.startCall = startCall;
+
+async function joinCall() {
+    if (!currentActiveUser) return;
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    } catch(e) { alert('Không thể truy cập mic! Vui lòng cấp quyền micro.'); return; }
+
+    await set(ref(db, `${CALL_REF}/participants/${currentActiveUser}`), { joinedAt: Date.now() });
+
+    // Connect to each existing participant
+    const snap = await get(ref(db, `${CALL_REF}/participants`));
+    const parts = snap.val() || {};
+    for (const name of Object.keys(parts)) {
+        if (name !== currentActiveUser) {
+            await createOffer(name);
+        }
+    }
+    callState = 'in-call';
+    myCallParticipant = true;
+    updateCallBar();
+}
+window.joinCall = joinCall;
+
+async function leaveCall() {
+    // Remove self from participants
+    if (currentActiveUser) {
+        await remove(ref(db, `${CALL_REF}/participants/${currentActiveUser}`));
+        // Check if anyone left
+        const snap = await get(ref(db, `${CALL_REF}/participants`));
+        const parts = snap.val() || {};
+        if (Object.keys(parts).length === 0) {
+            await remove(ref(db, CALL_REF));
+        }
+    }
+    cleanupCall();
+}
+window.leaveCall = leaveCall;
+
+function cleanupCall() {
+    // Close all peer connections
+    for (const pc of Object.values(peerConnections)) { try { pc.close(); } catch(e){} }
+    peerConnections = {};
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    clearInterval(callTimerInterval);
+    const timer = document.getElementById('call-timer');
+    if (timer) timer.textContent = '0:00';
+    callState = 'idle';
+    myCallParticipant = false;
+    updateCallBar();
+    document.getElementById('call-avatars').innerHTML = '';
+}
+
+function startCallTimer() {
+    clearInterval(callTimerInterval);
+    const timerEl = document.getElementById('call-timer');
+    callTimerInterval = setInterval(() => {
+        if (!timerEl) return;
+        timerEl.textContent = callFmt(Math.floor((Date.now() - callStartTime) / 1000));
+    }, 1000);
+}
+
+function toggleMic() {
+    if (!localStream) return;
+    const track = localStream.getAudioTracks()[0];
+    if (!track) return;
+    track.enabled = !track.enabled;
+    const btn = document.getElementById('call-btn-mic');
+    if (track.enabled) {
+        btn.textContent = '🎙️'; btn.classList.remove('muted'); btn.title = 'Tắt mic';
+    } else {
+        btn.textContent = '🔇'; btn.classList.add('muted'); btn.title = 'Bật mic';
+    }
+}
+window.toggleMic = toggleMic;
+
+function getPcKey(remote) { return remote; }
+
+async function createOffer(remoteUser) {
+    const pc = createPeerConnection(remoteUser);
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await set(ref(db, `${CALL_REF}/offers/${currentActiveUser}_to_${remoteUser}`), {
+        sdp: offer.sdp, type: offer.type
+    });
+}
+
+function createPeerConnection(remoteUser) {
+    if (peerConnections[remoteUser]) return peerConnections[remoteUser];
+    const pc = new RTCPeerConnection(iceConfig);
+    peerConnections[remoteUser] = pc;
+    // Add local tracks
+    if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    // Play remote audio
+    pc.ontrack = (e) => {
+        let audio = document.getElementById(`call-audio-${remoteUser}`);
+        if (!audio) {
+            audio = document.createElement('audio');
+            audio.id = `call-audio-${remoteUser}`;
+            audio.autoplay = true;
+            audio.style.display = 'none';
+            document.body.appendChild(audio);
+        }
+        audio.srcObject = e.streams[0];
+    };
+    // Send ICE candidates to Firebase
+    let icIdx = 0;
+    pc.onicecandidate = async (e) => {
+        if (e.candidate) {
+            await set(ref(db, `${CALL_REF}/ice/${currentActiveUser}_to_${remoteUser}_${icIdx++}`), {
+                candidate: JSON.stringify(e.candidate)
+            });
+        }
+    };
+    return pc;
+}
+
+// Listen to Firebase call_room changes
+function startCallSignaling() {
+    const unsubCall = onValue(ref(db, CALL_REF), async (snap) => {
+        const room = snap.val();
+        if (!room || !room.active) {
+            if (callState !== 'idle') {
+                // Call ended externally
+                cleanupCall();
+                // Remove remote audio elements
+                document.querySelectorAll('[id^="call-audio-"]').forEach(el => el.remove());
+            }
+            updateCallAvatars({});
+            if (callState === 'idle') { updateCallBar(); }
+            return;
+        }
+
+        const parts = room.participants || {};
+        updateCallAvatars(parts);
+
+        // Update sub text with participant count
+        const subEl = document.getElementById('call-bar-sub');
+        if (callState === 'active-notjoined' && subEl) {
+            subEl.textContent = `${Object.keys(parts).length} người • Bấm Tham gia để vào`;
+        }
+        if (callState === 'in-call' && subEl) {
+            subEl.textContent = `${Object.keys(parts).length} người đang gọi`;
+        }
+
+        // I'm not in the call yet
+        if (!myCallParticipant && currentActiveUser && !parts[currentActiveUser]) {
+            if (callState !== 'in-call') {
+                callState = 'active-notjoined';
+                callStartTime = room.startedAt || Date.now();
+                updateCallBar();
+            }
+            return;
+        }
+
+        if (!myCallParticipant) return; // not joined
+
+        // Process incoming offers addressed to me
+        const offers = room.offers || {};
+        for (const [key, offer] of Object.entries(offers)) {
+            const match = key.match(/^(.+)_to_(.+)$/);
+            if (!match) continue;
+            const from = match[1], to = match[2];
+            if (to !== currentActiveUser) continue;
+            if (peerConnections[from] && peerConnections[from].signalingState !== 'stable') continue;
+            const pc = createPeerConnection(from);
+            if (pc.signalingState !== 'stable') continue;
+            await pc.setRemoteDescription(new RTCSessionDescription({ type: offer.type, sdp: offer.sdp }));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            await set(ref(db, `${CALL_REF}/answers/${currentActiveUser}_to_${from}`), {
+                sdp: answer.sdp, type: answer.type
+            });
+        }
+
+        // Process incoming answers
+        const answers = room.answers || {};
+        for (const [key, answer] of Object.entries(answers)) {
+            const match = key.match(/^(.+)_to_(.+)$/);
+            if (!match) continue;
+            const from = match[1], to = match[2];
+            if (to !== currentActiveUser) continue;
+            const pc = peerConnections[from];
+            if (!pc || pc.signalingState !== 'have-local-offer') continue;
+            await pc.setRemoteDescription(new RTCSessionDescription({ type: answer.type, sdp: answer.sdp }));
+        }
+
+        // Process ICE candidates
+        const iceAll = room.ice || {};
+        for (const [key, iceData] of Object.entries(iceAll)) {
+            const match = key.match(/^(.+)_to_(.+)_\d+$/);
+            if (!match) continue;
+            const from = match[1], to = match[2];
+            if (to !== currentActiveUser) continue;
+            const pc = peerConnections[from];
+            if (!pc) continue;
+            try {
+                const cand = JSON.parse(iceData.candidate);
+                if (pc.remoteDescription) await pc.addIceCandidate(new RTCIceCandidate(cand));
+            } catch(e) {}
+        }
+    });
+    callUnsubscribers.push(unsubCall);
+}
+
+// Start signaling after login — called from enterSystemDashboard
+window._callSignalingStarted = false;
 
 // ====================================================
 // ACCORDION

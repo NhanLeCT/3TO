@@ -758,6 +758,12 @@
 .album-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 15px; font-style: italic; }
 .album-empty-icon { font-size: 48px; margin-bottom: 12px; }
 .album-loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Tạo thanh cuộn ngang khi màn hình hẹp */
+    -webkit-overflow-scrolling: touch; /* Giúp vuốt mượt trên iPhone/Android */
+    margin: 24px 0;
+}
     </style>
 </head>
 <body>
@@ -993,7 +999,8 @@
         <summary>📝 Bộ Sưu Tập Biệt Danh</summary>
         <div class="category-wrapper">
             <div class="category-content">
-                <table class="nickname-table">
+            <div class="table-container">    
+		    <table class="nickname-table">
                     <thead><tr><th style="width:60px;">STT</th><th>Biệt Danh</th><th>Tên</th><th>Ý Nghĩa Biệt Danh</th></tr></thead>
                     <tbody>
                         <tr><td>1</td><td><strong>Big Mouth</strong></td><td>Trâm Anh</td><td>Mồm to nên đặt thế</td></tr>
@@ -1031,6 +1038,7 @@
                 </table>
             </div>
         </div>
+	</div>
     </details>
 
     <details class="category-item" id="team-color">
@@ -1109,7 +1117,7 @@
                             <div class="stat-item"><span class="stat-label">Leo Biên</span><span class="stat-num">93</span></div>
                             <div class="stat-item"><span class="stat-label">Sport</span><span class="stat-num">94</span></div>
                         </div></div>
-                        <div class="fut-hidden-traits"><strong>Chỉ số ẩn:</strong> Đa năng, hấp thụ, hi sinh, bình tĩnh, tự tin, ngầu, tốc độ cao, handicap, cứng như thép, lộ ảnh, kẹt, càn quét, đấm</div>
+                        <div class="fut-hidden-traits"><strong>Chỉ số ẩn:</strong> Đa năng hấp thụ, Dọn sạch bàn tiệc</div>
                     </div>
                 </div>
             </div>

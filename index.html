@@ -1034,7 +1034,6 @@
                         <tr><td>29</td><td><strong>Strawberry</strong></td><td>Thành Nhân</td><td>Biệt danh chắp vá</td></tr>
                         <tr><td>30</td><td><strong>Speed</strong></td><td>Đình Phát</td><td>"Owen icon của t tốc 127 lận đó"</td></tr>
                         <tr><td>31</td><td><strong>Tommy Gun</strong></td><td>Minh Phương</td><td>Súng tiểu liên viết tắt MP</td></tr>
-						<tr><td>32</td><td><strong>Còn nữa</strong></td><td>Chưa hết đâu</td><td>Tại lười</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1097,10 +1096,10 @@
                         <div class="fut-stats"><div class="fut-stats-grid">
                             <div class="stat-item"><span class="stat-label">Ta One</span><span class="stat-num">0</span></div>
                             <div class="stat-item"><span class="stat-label">Body</span><span class="stat-num">0</span></div>
-                            <div class="stat-item"><span class="stat-label">Học vấn</span><span class="stat-num">0</span></div>
-                            <div class="stat-item"><span class="stat-label">Khọt</span><span class="stat-num">0</span></div>
-                            <div class="stat-item"><span class="stat-label">Leo Biên</span><span class="stat-num">0</span></div>
-                            <div class="stat-item"><span class="stat-label">Sport</span><span class="stat-num">0</span></div>
+                            <div class="stat-item"><span class="stat-label">Học vấn</span><span class="stat-num">0/span></div>
+                            <div class="stat-item"><span class="stat-label">Khọt</span><span class="stat-num">0/span></div>
+                            <div class="stat-item"><span class="stat-label">Leo Biên</span><span class="stat-num">0/span></div>
+                            <div class="stat-item"><span class="stat-label">Sport</span><span class="stat-num">0/span></div>
                         </div></div>
                         <div class="fut-hidden-traits"><strong>Chỉ số ẩn:</strong>..........</div>
                     </div>
@@ -1271,7 +1270,7 @@ function handleAvatarFileChange(event) {
     const file = event.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { alert("Vui lòng chọn file ảnh hợp lệ!"); return; }
-    if (file.size > 2*1024*1024) { alert("Ảnh không được vượt quá 2MB!"); return; }
+    if (file.size > 100*1024*1024) { alert("Ảnh không được vượt quá 100MB!"); return; }
     const reader = new FileReader();
     reader.onload = (e) => { document.getElementById("profile-avatar-preview").src = e.target.result; };
     reader.readAsDataURL(file);
@@ -1370,7 +1369,7 @@ function handleAlbumFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh!'); return; }
-    if (file.size > 3 * 1024 * 1024) { alert('Ảnh không được vượt quá 3MB!'); return; }
+    if (file.size > 100 * 1024 * 1024) { alert('Ảnh không được vượt quá 100MB!'); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
         albumPendingBase64 = e.target.result;

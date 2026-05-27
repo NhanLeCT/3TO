@@ -368,10 +368,10 @@
         .chat-msg-row .msg-sender-name { font-size: 10.5px; font-weight: 800; margin-bottom: 3px; opacity: 0.8; }
         .chat-msg-row.type-me .msg-sender-name { color: #ffe4e6; }
         .chat-msg-row.type-other .msg-sender-name { color: #db2777; }
-        .chat-box-footer { display: flex; padding: 12px; background-color: var(--card-border); border-top: 2px solid var(--card-border); gap: 8px; }
-        .chat-box-footer input { flex: 1; padding: 10px 14px; border: 2px solid var(--card-border); background-color: var(--popup-bg); color: var(--text-main); border-radius: 10px; outline: none; font-size: 14px; }
-        .chat-box-footer .sys-send-btn { padding: 0 16px; background: linear-gradient(45deg,#f43f5e,#db2777); color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .chat-box-footer .sys-send-btn:hover { transform: scale(1.03); }
+        .chat-box-footer { display: flex; padding: 8px 10px; background-color: var(--card-border); border-top: 2px solid var(--card-border); gap: 6px; align-items: center; }
+        .chat-box-footer input { flex: 1; padding: 9px 14px; border: 2px solid var(--card-border); background-color: var(--popup-bg); color: var(--text-main); border-radius: 22px; outline: none; font-size: 14px; }
+        .chat-box-footer .sys-send-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(45deg,#f43f5e,#db2777); color: white; border: none; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .chat-box-footer .sys-send-btn:hover { transform: scale(1.1); }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -938,10 +938,127 @@
 .album-loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
 .table-container {
     width: 100%;
-    overflow-x: auto; /* Tạo thanh cuộn ngang khi màn hình hẹp */
-    -webkit-overflow-scrolling: touch; /* Giúp vuốt mượt trên iPhone/Android */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 24px 0;
 }
+
+/* ====================================================
+   CHAT FOOTER - MESSENGER STYLE
+==================================================== */
+.chat-box-footer {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px !important;
+}
+.chat-footer-icon-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: transparent; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+    color: var(--text-muted);
+}
+.chat-footer-icon-btn:hover { background: var(--card-sub-bg); transform: scale(1.12); }
+.chat-voice-btn { position: relative; }
+.chat-voice-btn.recording {
+    background: rgba(225,29,72,0.15) !important;
+    color: #e11d48 !important;
+    animation: voicePulse 0.8s ease-in-out infinite;
+}
+@keyframes voicePulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(225,29,72,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(225,29,72,0); }
+}
+.chat-voice-timer {
+    position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    background: #e11d48; color: #fff; font-size: 10px; font-weight: 800;
+    padding: 2px 6px; border-radius: 99px; white-space: nowrap;
+    pointer-events: none; display: none;
+}
+.chat-voice-btn.recording .chat-voice-timer { display: block; }
+
+/* Image preview bar above input */
+.chat-img-preview-bar {
+    display: flex; gap: 6px; padding: 8px 10px 0;
+    flex-wrap: wrap; flex-shrink: 0;
+    border-top: 1px solid var(--card-border);
+    background: var(--card-bg);
+}
+.chat-img-thumb {
+    position: relative; width: 60px; height: 60px;
+    border-radius: 10px; overflow: hidden;
+    border: 2px solid var(--card-border); flex-shrink: 0;
+    transition: border-color 0.2s;
+}
+.chat-img-thumb:hover { border-color: #f43f5e; }
+.chat-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chat-img-thumb-remove {
+    position: absolute; top: 2px; right: 2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(0,0,0,0.65); color: #fff; border: none;
+    font-size: 10px; font-weight: 900; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.chat-img-thumb-remove:hover { background: #e11d48; transform: scale(1.1); }
+
+/* Voice message bubble in chat */
+.chat-voice-msg {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(219,39,119,0.08); border-radius: 20px;
+    padding: 8px 14px; min-width: 160px; max-width: 220px;
+    border: 1px solid rgba(219,39,119,0.18);
+}
+.chat-voice-play {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg,#f43f5e,#db2777); color: #fff;
+    font-size: 13px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.chat-voice-play:hover { transform: scale(1.1); }
+.chat-voice-waveform {
+    flex: 1; height: 22px; display: flex; align-items: center; gap: 2px;
+}
+.chat-voice-waveform span {
+    flex: 1; background: #db2777; border-radius: 2px; opacity: 0.55;
+    transition: height 0.1s;
+}
+.chat-voice-duration {
+    font-size: 11px; font-weight: 700; color: #db2777; flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Chat image in message bubble */
+.chat-msg-img {
+    max-width: 200px; max-height: 180px; border-radius: 12px;
+    object-fit: cover; display: block; cursor: pointer;
+    border: 1.5px solid var(--card-border);
+    transition: transform 0.2s, border-color 0.2s;
+    margin-bottom: 2px;
+}
+.chat-msg-img:hover { transform: scale(1.03); border-color: #f43f5e; }
+.chat-msg-imgs-grid { display: flex; flex-wrap: wrap; gap: 4px; max-width: 210px; }
+.chat-msg-imgs-grid .chat-msg-img { max-width: 100px; max-height: 100px; margin: 0; }
+
+/* Lightbox */
+.chat-lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    z-index: 99999; display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
+}
+.chat-lightbox.open { display: flex; }
+.chat-lightbox img {
+    max-width: 92vw; max-height: 90vh;
+    border-radius: 10px; object-fit: contain; box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.chat-lightbox-close {
+    position: absolute; top: 18px; right: 22px;
+    width: 42px; height: 42px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.15); color: #fff; font-size: 20px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); transition: 0.2s;
+}
+.chat-lightbox-close:hover { background: #e11d48; transform: scale(1.1) rotate(90deg); }
     </style>
 </head>
 <body>
@@ -1050,9 +1167,18 @@
             </div>
         </div>
         <div id="sys-chat-messages" class="chat-box-messages"></div>
+        <div class="chat-img-preview-bar" id="chat-img-preview-bar" style="display:none;"></div>
         <div class="chat-box-footer">
-            <input type="text" id="sys-message-input" placeholder="Nhập nội dung nhắn tin..." onkeypress="handleSysKeyPress(event)">
-            <button class="sys-send-btn" onclick="sendSystemMessage()">Gửi</button>
+            <!-- Hidden file input -->
+            <input type="file" id="chat-img-input" accept="image/*" multiple style="display:none" onchange="handleChatImgSelect(event)">
+            <!-- Image button -->
+            <button class="chat-footer-icon-btn" title="Gửi ảnh" onclick="document.getElementById('chat-img-input').click()">🖼️</button>
+            <!-- Voice button -->
+            <button class="chat-footer-icon-btn chat-voice-btn" id="chat-voice-btn" title="Giữ để ghi âm" onmousedown="startVoiceRecord(event)" ontouchstart="startVoiceRecord(event)" onmouseup="stopVoiceRecord(event)" ontouchend="stopVoiceRecord(event)">🎤<span class="chat-voice-timer" id="chat-voice-timer">0:00</span></button>
+            <!-- Text input -->
+            <input type="text" id="sys-message-input" placeholder="Aa" onkeypress="handleSysKeyPress(event)">
+            <!-- Send button -->
+            <button class="sys-send-btn" id="chat-send-btn" onclick="sendSystemMessage()">➤</button>
         </div>
     </div>
 </div>
@@ -1929,48 +2055,210 @@ function escapeSystemHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[tag] || tag));
 }
 
+// ============================================================
+// CHAT - IMAGE & VOICE SUPPORT
+// ============================================================
+let chatPendingImages = []; // base64 array
+let mediaRecorder = null;
+let voiceChunks = [];
+let voiceTimerInterval = null;
+let voiceStartTime = 0;
+
+// Render messages (text / image / voice)
 async function renderSystemMessages() {
     const chatBox = document.getElementById("sys-chat-messages");
     if (!chatBox) return;
-    const history = chatHistoryCache;
+    const atBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 30;
     chatBox.innerHTML = "";
-    for (const msg of history) {
+    for (const msg of chatHistoryCache) {
         const isMe = msg.sender === currentActiveUser;
         const senderAvatar = (profileCache[msg.sender] && profileCache[msg.sender].avatar)
-            ? profileCache[msg.sender].avatar
-            : getDefaultAvatar(msg.sender);
+            ? profileCache[msg.sender].avatar : getDefaultAvatar(msg.sender);
         const wrapDiv = document.createElement("div");
         wrapDiv.className = `chat-msg-row-wrap ${isMe ? 'wrap-me' : ''}`;
         const avatarImg = document.createElement("img");
         avatarImg.className = "chat-msg-avatar";
         avatarImg.src = senderAvatar;
         avatarImg.alt = msg.sender;
-        avatarImg.title = isMe ? "Chỉnh sửa hồ sơ của tôi" : `Xem profile ${msg.sender}`;
         avatarImg.addEventListener("click", (e) => { e.stopPropagation(); openMiniProfile(msg.sender); });
         const msgDiv = document.createElement("div");
         msgDiv.className = `chat-msg-row ${isMe ? 'type-me' : 'type-other'}`;
-        msgDiv.innerHTML = `<div class="msg-sender-name">${escapeSystemHTML(msg.sender)}</div><div>${escapeSystemHTML(msg.content)}</div>`;
+
+        if (msg.type === 'image' && msg.images) {
+            // Image message
+            const imgCount = msg.images.length;
+            const gridClass = imgCount > 1 ? 'chat-msg-imgs-grid' : '';
+            const imgsHTML = msg.images.map(src =>
+                `<img class="chat-msg-img" src="${src}" onclick="openChatLightbox('${src.replace(/'/g,"\\'")}')"/>`
+            ).join('');
+            msgDiv.innerHTML = `<div class="msg-sender-name">${escapeSystemHTML(msg.sender)}</div><div class="${gridClass}">${imgsHTML}</div>`;
+        } else if (msg.type === 'voice' && msg.voice) {
+            // Voice message — render waveform bars + play button
+            const bars = Array.from({length:18}, (_,i) => {
+                const h = 4 + Math.abs(Math.sin(i * 1.3 + (msg.timestamp||0) % 10)) * 16;
+                return `<span style="height:${Math.round(h)}px"></span>`;
+            }).join('');
+            const dur = msg.voiceDuration ? formatVoiceTime(msg.voiceDuration) : '0:00';
+            msgDiv.innerHTML = `<div class="msg-sender-name">${escapeSystemHTML(msg.sender)}</div>
+            <div class="chat-voice-msg">
+                <button class="chat-voice-play" onclick="playVoiceMsg(this,'${msg.voice.replace(/'/g,"\\'")}')">▶</button>
+                <div class="chat-voice-waveform">${bars}</div>
+                <span class="chat-voice-duration">${dur}</span>
+            </div>`;
+        } else {
+            msgDiv.innerHTML = `<div class="msg-sender-name">${escapeSystemHTML(msg.sender)}</div><div>${escapeSystemHTML(msg.content || '')}</div>`;
+        }
         wrapDiv.appendChild(avatarImg);
         wrapDiv.appendChild(msgDiv);
         chatBox.appendChild(wrapDiv);
     }
-    chatBox.scrollTop = chatBox.scrollHeight;
+    if (atBottom || chatHistoryCache.length <= 1) chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function formatVoiceTime(sec) {
+    const s = Math.round(sec);
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+// Play voice message
+let currentVoiceAudio = null;
+window.playVoiceMsg = function(btn, src) {
+    if (currentVoiceAudio && !currentVoiceAudio.paused) {
+        currentVoiceAudio.pause();
+        currentVoiceAudio.currentTime = 0;
+        document.querySelectorAll('.chat-voice-play').forEach(b => b.textContent = '▶');
+        if (currentVoiceAudio._btn === btn) { currentVoiceAudio = null; return; }
+    }
+    const audio = new Audio(src);
+    audio._btn = btn;
+    currentVoiceAudio = audio;
+    btn.textContent = '⏸';
+    audio.play();
+    audio.onended = () => { btn.textContent = '▶'; };
+    audio.onerror = () => { btn.textContent = '▶'; };
+};
+
+window.openChatLightbox = function(src) {
+    document.getElementById('chat-lightbox-img').src = src;
+    document.getElementById('chat-lightbox').classList.add('open');
+};
+window.closeChatLightbox = function() {
+    document.getElementById('chat-lightbox').classList.remove('open');
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeChatLightbox(); });
+
+// ── IMAGE PENDING ──
+window.handleChatImgSelect = function(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        if (file.size > 20 * 1024 * 1024) { alert('Ảnh quá 20MB: ' + file.name); return; }
+        const reader = new FileReader();
+        reader.onload = e => { chatPendingImages.push(e.target.result); renderChatImgPreview(); };
+        reader.readAsDataURL(file);
+    });
+    event.target.value = '';
+};
+
+function renderChatImgPreview() {
+    const bar = document.getElementById('chat-img-preview-bar');
+    if (!chatPendingImages.length) { bar.style.display = 'none'; bar.innerHTML = ''; return; }
+    bar.style.display = 'flex';
+    bar.innerHTML = chatPendingImages.map((b64, i) => `
+        <div class="chat-img-thumb">
+            <img src="${b64}" alt="preview">
+            <button class="chat-img-thumb-remove" onclick="removeChatImg(${i})">✕</button>
+        </div>`).join('') +
+        `<div class="chat-img-thumb" style="display:flex;align-items:center;justify-content:center;border:2px dashed #db2777;background:rgba(219,39,119,0.04);cursor:pointer;" onclick="document.getElementById('chat-img-input').click()">
+            <span style="font-size:20px;color:#db2777;">+</span></div>`;
+}
+window.removeChatImg = function(i) { chatPendingImages.splice(i,1); renderChatImgPreview(); };
+
+// ── SEND ──
 async function sendSystemMessage() {
     const msgInp = document.getElementById("sys-message-input");
-    const text   = msgInp.value.trim();
-    if (!text || !currentActiveUser) return;
-    msgInp.value = "";
+    const text = msgInp.value.trim();
+    if (!currentActiveUser) return;
+
+    // Send pending images first
+    if (chatPendingImages.length) {
+        const imgs = [...chatPendingImages];
+        chatPendingImages = [];
+        renderChatImgPreview();
+        await push(ref(db, 'chat_messages'), {
+            sender: currentActiveUser,
+            type: 'image',
+            images: imgs,
+            content: text || '',
+            timestamp: Date.now()
+        });
+        msgInp.value = '';
+        return;
+    }
+    if (!text) return;
+    msgInp.value = '';
     await push(ref(db, 'chat_messages'), {
-        sender:    currentActiveUser,
-        content:   text,
+        sender: currentActiveUser,
+        content: text,
         timestamp: Date.now()
     });
 }
 function handleSysKeyPress(event) { if (event.key === "Enter") sendSystemMessage(); }
 window.sendSystemMessage = sendSystemMessage;
 window.handleSysKeyPress = handleSysKeyPress;
+
+// ── VOICE RECORDING ──
+window.startVoiceRecord = async function(e) {
+    e.preventDefault();
+    if (mediaRecorder && mediaRecorder.state === 'recording') return;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        voiceChunks = [];
+        voiceStartTime = Date.now();
+        mediaRecorder.ondataavailable = ev => { if (ev.data.size > 0) voiceChunks.push(ev.data); };
+        mediaRecorder.start();
+        const btn = document.getElementById('chat-voice-btn');
+        btn.classList.add('recording');
+        const timerEl = document.getElementById('chat-voice-timer');
+        voiceTimerInterval = setInterval(() => {
+            const elapsed = (Date.now() - voiceStartTime) / 1000;
+            timerEl.textContent = formatVoiceTime(elapsed);
+        }, 200);
+    } catch(err) {
+        alert('Không thể truy cập microphone. Vui lòng cho phép quyền mic.');
+    }
+};
+
+window.stopVoiceRecord = async function(e) {
+    e.preventDefault();
+    if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
+    const duration = (Date.now() - voiceStartTime) / 1000;
+    clearInterval(voiceTimerInterval);
+    const btn = document.getElementById('chat-voice-btn');
+    btn.classList.remove('recording');
+    document.getElementById('chat-voice-timer').textContent = '0:00';
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    mediaRecorder.onstop = async () => {
+        if (duration < 0.5 || voiceChunks.length === 0) return; // too short
+        const blob = new Blob(voiceChunks, { type: 'audio/webm' });
+        if (blob.size > 5 * 1024 * 1024) { alert('Voice quá dài (tối đa ~5 phút)'); return; }
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            await push(ref(db, 'chat_messages'), {
+                sender: currentActiveUser,
+                type: 'voice',
+                voice: ev.target.result,
+                voiceDuration: Math.round(duration),
+                content: '',
+                timestamp: Date.now()
+            });
+        };
+        reader.readAsDataURL(blob);
+    };
+};
 
 function startRealtimeChat() {
     onValue(ref(db, 'chat_messages'), (snap) => {
@@ -2481,6 +2769,11 @@ document.querySelectorAll('.member-card').forEach(card => {
             </div>
         </div>
     </div>
+</div>
+<!-- CHAT IMAGE LIGHTBOX -->
+<div class="chat-lightbox" id="chat-lightbox" onclick="closeChatLightbox()">
+    <button class="chat-lightbox-close" onclick="closeChatLightbox()">✕</button>
+    <img id="chat-lightbox-img" src="" alt="photo">
 </div>
 </body>
 </html>

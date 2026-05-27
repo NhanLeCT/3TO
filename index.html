@@ -1132,20 +1132,21 @@
 /* Bubble tin nhắn đã thu hồi - outline style như Messenger */
 .chat-msg-recalled {
     font-size: 12px;
-    color: var(--text-muted);
+    color: #9d174d;
     font-style: italic;
     padding: 5px 11px;
-    border: 1.5px solid var(--card-border);
+    border: 2px solid rgba(219,39,119,0.35);
     border-radius: 14px;
-    background: transparent;
+    background: rgba(255,241,242,0.85);
     display: flex;
     align-items: center;
     gap: 5px;
-    opacity: 0.85;
+    opacity: 0.92;
 }
-/* Tương phản tốt cho cả sáng và tối */
+/* Tương phản tốt cho dark */
 [data-theme="dark"] .chat-msg-recalled {
-    border-color: rgba(148,163,184,0.35);
+    border-color: rgba(148,163,184,0.4);
+    background: rgba(30,41,59,0.6);
     color: rgba(248,250,252,0.55);
 }
 .chat-msg-recalled-icon {
@@ -2237,6 +2238,21 @@ async function renderSystemMessages() {
                 e.stopPropagation();
                 toggleRecallMenu(wrapDiv, msg._key);
             });
+            // Long-press cho mobile: giữ 500ms để hiện menu thu hồi
+            let _lpTimer = null;
+            const startLongPress = () => {
+                _lpTimer = setTimeout(() => {
+                    _lpTimer = null;
+                    if (navigator.vibrate) navigator.vibrate(40);
+                    toggleRecallMenu(wrapDiv, msg._key);
+                }, 500);
+            };
+            const cancelLongPress = () => {
+                if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
+            };
+            msgDiv.addEventListener('touchstart', startLongPress, { passive: true });
+            msgDiv.addEventListener('touchend', cancelLongPress);
+            msgDiv.addEventListener('touchmove', cancelLongPress);
             // wrap-me row-reverse: DOM [avatarImg, msgDiv, recallBtn]
             // → hiển thị trái→phải: ··· | bubble | avatar
             wrapDiv.appendChild(avatarImg);

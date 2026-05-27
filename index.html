@@ -365,6 +365,8 @@
         }
         .chat-msg-row.type-other { background-color: var(--card-border); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; }
         .chat-msg-row.type-me { background: linear-gradient(135deg,#f43f5e,#db2777); color: white; align-self: flex-end; border-top-right-radius: 4px; }
+        .chat-msg-row.type-me.is-recalled,
+        .chat-msg-row.type-other.is-recalled { background: transparent !important; box-shadow: none; padding: 0; }
         .chat-msg-row .msg-sender-name { font-size: 10.5px; font-weight: 800; margin-bottom: 3px; opacity: 0.8; }
         .chat-msg-row.type-me .msg-sender-name { color: #ffe4e6; }
         .chat-msg-row.type-other .msg-sender-name { color: #db2777; }
@@ -2197,6 +2199,7 @@ async function renderSystemMessages() {
         msgDiv.className = `chat-msg-row ${isMe ? 'type-me' : 'type-other'}`;
 
         if (msg.recalled) {
+            msgDiv.classList.add('is-recalled');
             // Tin nhắn đã thu hồi
             msgDiv.innerHTML = `<div class="chat-msg-recalled"><span class="chat-msg-recalled-icon">🚫</span> ${isMe ? 'Bạn đã thu hồi tin nhắn này' : `<em>${escapeSystemHTML(msg.sender)}</em> đã thu hồi tin nhắn`}</div>`;
         } else if (msg.type === 'image' && msg.images) {

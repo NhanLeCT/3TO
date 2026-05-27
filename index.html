@@ -522,6 +522,116 @@
     transform: translateY(-2px);
 }
 
+
+/* ====================================================
+   ALBUM - MULTI-IMAGE UPLOAD PREVIEW (Messenger-style)
+==================================================== */
+.album-multi-preview-grid {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+}
+.amp-thumb {
+    position: relative; border-radius: 10px; overflow: hidden;
+    border: 2px solid var(--card-border); flex-shrink: 0;
+    transition: border-color 0.2s;
+}
+.amp-thumb:hover { border-color: #f43f5e; }
+.amp-thumb-img { display: block; object-fit: cover; }
+.amp-remove {
+    position: absolute; top: 4px; right: 4px; width: 20px; height: 20px;
+    background: rgba(0,0,0,0.65); color: #fff; border: none; border-radius: 50%;
+    font-size: 11px; font-weight: 900; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.amp-remove:hover { background: #e11d48; transform: scale(1.1); }
+/* 1 ảnh: to */
+.amp-count-1 .amp-thumb-img { width: 200px; height: 160px; }
+/* 2 ảnh: 2 cột */
+.amp-count-2 .amp-thumb-img { width: 120px; height: 110px; }
+/* 3+ ảnh: nhỏ hơn */
+.amp-count-many .amp-thumb-img { width: 90px; height: 80px; }
+
+/* Post nhiều ảnh trong gallery: dạng collage nhỏ */
+.agc-multi-badge {
+    position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6);
+    color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px;
+    border-radius: 12px; backdrop-filter: blur(4px); pointer-events: none;
+}
+
+/* ALBUM MODAL: arrow navigation khi có nhiều ảnh */
+.album-modal-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); color: #fff; border: none; cursor: pointer;
+    font-size: 20px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.22s; z-index: 20; backdrop-filter: blur(4px);
+}
+.album-modal-nav:hover { background: rgba(244,63,94,0.75); transform: translateY(-50%) scale(1.1); }
+.album-modal-nav.prev-btn { left: 12px; }
+.album-modal-nav.next-btn { right: 12px; }
+.album-modal-dots {
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 20;
+}
+.album-modal-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.45); border: none; cursor: pointer;
+    transition: all 0.2s; padding: 0;
+}
+.album-modal-dot.active { background: #f43f5e; transform: scale(1.25); }
+
+/* ====================================================
+   REPLY COMMENT SYSTEM
+==================================================== */
+.apc-comment-actions {
+    display: flex; align-items: center; gap: 12px; margin-top: 4px; padding-left: 2px;
+}
+.apc-reply-btn, .apc-like-cmt-btn {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    background: none; border: none; cursor: pointer; padding: 0;
+    transition: color 0.2s;
+}
+.apc-reply-btn:hover { color: #db2777; }
+.apc-like-cmt-btn:hover { color: #e11d48; }
+.apc-like-cmt-btn.liked { color: #e11d48; }
+.apc-cmt-time { font-size: 10px; color: var(--text-desc); }
+
+.apc-replies-wrap { margin-left: 38px; margin-top: 6px; display: flex; flex-direction: column; gap: 7px; }
+.apc-reply-item { display: flex; gap: 7px; align-items: flex-start; }
+.apc-reply-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--card-border); flex-shrink: 0; cursor: pointer; transition: 0.2s; }
+.apc-reply-avatar:hover { border-color: #db2777; transform: scale(1.08); }
+.apc-reply-bubble { background: var(--card-sub-bg); border-radius: 12px; padding: 5px 10px; font-size: 12.5px; color: var(--text-main); line-height: 1.5; flex: 1; }
+.apc-reply-author { font-weight: 800; color: #db2777; font-size: 11.5px; cursor: pointer; }
+.apc-reply-author:hover { text-decoration: underline; }
+
+.apc-reply-input-wrap {
+    margin-left: 38px; margin-top: 6px;
+    display: flex; gap: 6px; align-items: center;
+    animation: fadeInUp 0.2s ease;
+}
+.apc-reply-input {
+    flex: 1; padding: 6px 12px; border: 1.5px solid #f43f5e;
+    border-radius: 16px; font-size: 12.5px; background: var(--card-sub-bg);
+    color: var(--text-main); outline: none; font-family: inherit;
+}
+.apc-reply-send {
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: linear-gradient(45deg,#f43f5e,#db2777); color: #fff;
+    font-size: 13px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.apc-reply-send:hover { transform: scale(1.1); }
+.apc-reply-cancel {
+    font-size: 11px; color: var(--text-muted); background: none; border: none;
+    cursor: pointer; padding: 0; transition: color 0.2s;
+}
+.apc-reply-cancel:hover { color: #e11d48; }
+
+/* ====================================================
+   MEMBER CARD - click avatar/name to open mini profile
+==================================================== */
+.member-avatar-link, .member-name-link { cursor: pointer; }
+.member-name-link:hover { color: #db2777; text-decoration: underline; }
+
 /* ====================================================
    ALBUM - GALLERY + FB MODAL STYLE
 ==================================================== */
@@ -610,10 +720,11 @@
 /* ── FB-STYLE MODAL ── */
 .album-modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.88);
-    z-index: 10000; display: none; align-items: center; justify-content: center;
+    z-index: 20000; display: none; align-items: center; justify-content: center;
     backdrop-filter: blur(5px); padding: 16px;
 }
 .album-modal-overlay.open { display: flex; animation: fadeInUp 0.25s ease; }
+
 
 .album-modal-box {
     display: flex; width: 100%; max-width: 1000px; height: 90vh; max-height: 720px;
@@ -637,6 +748,7 @@
     max-width: 100%; max-height: 100%;
     object-fit: contain; display: block;
     animation: fadeInUp 0.3s ease;
+    transition: opacity 0.15s ease;
 }
 
 /* Right: panel */
@@ -652,8 +764,15 @@
     display: flex; align-items: center; gap: 10px;
     padding: 14px 16px 12px;
     border-bottom: 1px solid var(--card-border);
-    flex-shrink: 0;
+    flex-shrink: 0; position: relative; z-index: 5;
 }
+.amr-close-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--card-border);
+    background: var(--card-sub-bg); color: var(--text-muted); cursor: pointer;
+    font-size: 15px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.22s; flex-shrink: 0; margin-left: 4px;
+}
+.amr-close-btn:hover { background: #f43f5e; color: #fff; border-color: #f43f5e; transform: scale(1.1) rotate(90deg); }
 .amr-avatar {
     width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
     border: 2px solid #db2777; cursor: pointer; flex-shrink: 0; transition: 0.25s;
@@ -751,7 +870,7 @@
     border: 1.5px solid rgba(225,29,72,0.4); background: transparent;
     color: #e11d48; font-size: 12px; font-weight: 700; cursor: pointer;
     display: flex; align-items: center; gap: 5px; transition: all 0.22s;
-    flex-shrink: 0;
+    flex-shrink: 0; position: relative; z-index: 5;
 }
 .amr-delete-btn:hover { background: rgba(225,29,72,0.12); border-color: #e11d48; }
 
@@ -1151,18 +1270,13 @@
             <div class="category-content" id="album-content-wrap">
                 <!-- UPLOAD AREA -->
                 <div id="album-post-composer" style="padding-top:18px;">
-                    <input type="file" id="album-file-input" accept="image/*" style="display:none;" onchange="handleAlbumFileSelect(event)">
+                    <input type="file" id="album-file-input" accept="image/*" multiple style="display:none;" onchange="handleAlbumFileSelect(event)">
                     <div class="album-upload-area" id="album-drop-zone" onclick="document.getElementById('album-file-input').click()">
                         <div class="album-upload-icon">📷</div>
-                        <div class="album-upload-text">Nhấn để chọn ảnh</div>
-                        <div class="album-upload-sub">JPG, PNG, GIF — tối đa 100MB</div>
+                        <div class="album-upload-text">Nhấn để chọn ảnh (có thể chọn nhiều)</div>
+                        <div class="album-upload-sub">JPG, PNG, GIF — mỗi ảnh tối đa 100MB</div>
                     </div>
-                    <div id="album-preview-container" style="display:none; margin-bottom:12px;">
-                        <div class="album-preview-wrap">
-                            <img id="album-preview-img" class="album-preview-img" src="" alt="preview">
-                            <button class="album-preview-remove" onclick="clearAlbumPreview()">✕</button>
-                        </div>
-                    </div>
+                    <div id="album-multi-preview" class="album-multi-preview-grid" style="display:none;"></div>
                     <textarea class="album-caption-input" id="album-caption" placeholder="Viết caption..." maxlength="200"></textarea>
                     <button class="album-post-btn" id="album-post-btn" onclick="submitAlbumPost()" disabled>
                         📤 Đăng ảnh
@@ -1379,50 +1493,91 @@ function updateUnreadBadge(count) {
 }
 
 // ====================================================
-// ALBUM (Firebase: /album_posts)
+// ALBUM (Firebase: /album_posts) - MULTI-IMAGE + REPLY
 // ====================================================
-let albumPendingBase64 = null;
+let albumPendingImages = []; // Array of base64 strings
 let albumPostsCache = {};
 window._albumModalPostId = null;
 window._albumModalSender = null;
+window._albumModalImgIdx = 0; // current image index in multi-image modal
+let _replyingToCommentId = null;
+let _replyingToAuthor = null;
+
+function renderMultiPreview() {
+    const grid = document.getElementById('album-multi-preview');
+    const dropZone = document.getElementById('album-drop-zone');
+    const btn = document.getElementById('album-post-btn');
+    if (albumPendingImages.length === 0) {
+        grid.style.display = 'none';
+        dropZone.style.display = 'block';
+        btn.disabled = true;
+        return;
+    }
+    dropZone.style.display = 'none';
+    grid.style.display = 'flex';
+    const countClass = albumPendingImages.length === 1 ? 'amp-count-1' : albumPendingImages.length === 2 ? 'amp-count-2' : 'amp-count-many';
+    grid.className = 'album-multi-preview-grid ' + countClass;
+    grid.innerHTML = albumPendingImages.map((b64, i) => `
+        <div class="amp-thumb">
+            <img class="amp-thumb-img" src="${b64}" alt="preview ${i+1}">
+            <button class="amp-remove" onclick="removeAlbumPreviewImg(${i})">✕</button>
+        </div>
+    `).join('');
+    // Add more button
+    grid.innerHTML += `<div class="amp-thumb" style="display:flex;align-items:center;justify-content:center;border:2px dashed #db2777;border-radius:10px;cursor:pointer;background:rgba(219,39,119,0.04);min-width:60px;" onclick="document.getElementById('album-file-input').click()">
+        <span style="font-size:22px;color:#db2777;">+</span></div>`;
+    btn.disabled = false;
+}
+window.removeAlbumPreviewImg = function(idx) {
+    albumPendingImages.splice(idx, 1);
+    renderMultiPreview();
+};
 
 function handleAlbumFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh!'); return; }
-    if (file.size > 100 * 1024 * 1024) { alert('Ảnh không được vượt quá 100MB!'); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        albumPendingBase64 = e.target.result;
-        document.getElementById('album-preview-img').src = albumPendingBase64;
-        document.getElementById('album-preview-container').style.display = 'block';
-        document.getElementById('album-drop-zone').style.display = 'none';
-        document.getElementById('album-post-btn').disabled = false;
-    };
-    reader.readAsDataURL(file);
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+    let loaded = 0;
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh! (' + file.name + ')'); return; }
+        if (file.size > 100 * 1024 * 1024) { alert('Ảnh "' + file.name + '" vượt quá 100MB!'); return; }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            albumPendingImages.push(e.target.result);
+            loaded++;
+            if (loaded === files.length) renderMultiPreview();
+        };
+        reader.readAsDataURL(file);
+    });
     event.target.value = '';
 }
 window.handleAlbumFileSelect = handleAlbumFileSelect;
 
 function clearAlbumPreview() {
-    albumPendingBase64 = null;
-    document.getElementById('album-preview-img').src = '';
-    document.getElementById('album-preview-container').style.display = 'none';
-    document.getElementById('album-drop-zone').style.display = 'block';
-    document.getElementById('album-post-btn').disabled = true;
+    albumPendingImages = [];
+    renderMultiPreview();
 }
 window.clearAlbumPreview = clearAlbumPreview;
 
 async function submitAlbumPost() {
-    if (!albumPendingBase64 || !currentActiveUser) return;
+    if (!albumPendingImages.length || !currentActiveUser) return;
     const caption = document.getElementById('album-caption').value.trim();
     const btn = document.getElementById('album-post-btn');
     btn.disabled = true; btn.textContent = '⏳ Đang đăng...';
     try {
-        await push(ref(db, 'album_posts'), {
-            sender: currentActiveUser, image: albumPendingBase64,
-            caption: caption, timestamp: Date.now(), likes: {}, comments: {}
-        });
+        const postData = {
+            sender: currentActiveUser,
+            caption: caption,
+            timestamp: Date.now(),
+            likes: {},
+            comments: {}
+        };
+        if (albumPendingImages.length === 1) {
+            postData.image = albumPendingImages[0];
+        } else {
+            postData.images = albumPendingImages; // array of base64
+            postData.image = albumPendingImages[0]; // first as thumbnail
+        }
+        await push(ref(db, 'album_posts'), postData);
         document.getElementById('album-caption').value = '';
         clearAlbumPreview();
     } catch(e) { alert('Đăng ảnh thất bại!'); btn.disabled = false; }
@@ -1444,7 +1599,7 @@ function renderAlbumFeed(posts) {
     const feed = document.getElementById('album-feed');
     if (!feed) return;
     if (!posts || Object.keys(posts).length === 0) {
-        feed.innerHTML = `<div class="album-empty" style="grid-column:1/-1"><div class="album-empty-icon">🌸</div>Chưa có ảnh nào. Hãy đăng ký niệm đầu tiên!</div>`;
+        feed.innerHTML = `<div class="album-empty" style="grid-column:1/-1"><div class="album-empty-icon">🌸</div>Chưa có ảnh nào. Hãy đăng kỷ niệm đầu tiên!</div>`;
         return;
     }
     const sorted = Object.entries(posts).sort((a,b) => b[1].timestamp - a[1].timestamp);
@@ -1455,11 +1610,14 @@ function renderAlbumFeed(posts) {
         const commentCount = post.comments ? Object.keys(post.comments).length : 0;
         const senderAvatar = (profileCache[post.sender] && profileCache[post.sender].avatar)
             ? profileCache[post.sender].avatar : getDefaultAvatar(post.sender);
+        const images = post.images || (post.image ? [post.image] : []);
+        const imgCount = images.length;
         const card = document.createElement('div');
         card.className = 'agc';
         card.style.animationDelay = `${idx * 0.04}s`;
         card.innerHTML = `
             <img class="agc-img" src="${post.image}" alt="album" loading="lazy">
+            ${imgCount > 1 ? `<div class="agc-multi-badge">+${imgCount} ảnh</div>` : ''}
             <div class="agc-strip">
                 <div class="agc-strip-sender">
                     <img class="agc-strip-avatar" src="${senderAvatar}" alt="">
@@ -1478,12 +1636,53 @@ function renderAlbumFeed(posts) {
     }
 }
 
+function albumModalNav(dir) {
+    const post = albumPostsCache[window._albumModalPostId];
+    if (!post) return;
+    const images = post.images || [post.image];
+    window._albumModalImgIdx = (window._albumModalImgIdx + dir + images.length) % images.length;
+    updateModalImage(images);
+}
+window.albumModalNav = albumModalNav;
+
+function updateModalImage(images) {
+    const idx = window._albumModalImgIdx;
+    const photo = document.getElementById('album-modal-photo');
+    photo.style.opacity = '0';
+    setTimeout(() => { photo.src = images[idx]; photo.style.opacity = '1'; }, 150);
+    // update dots
+    const dotsEl = document.getElementById('album-modal-dots');
+    dotsEl.innerHTML = images.map((_, i) =>
+        `<button class="album-modal-dot${i===idx?' active':''}" onclick="albumModalGoTo(${i})"></button>`
+    ).join('');
+    // nav buttons
+    const prev = document.getElementById('album-modal-prev');
+    const next = document.getElementById('album-modal-next');
+    if (images.length > 1) {
+        prev.style.display = 'flex'; next.style.display = 'flex';
+        dotsEl.style.display = 'flex';
+    } else {
+        prev.style.display = 'none'; next.style.display = 'none';
+        dotsEl.style.display = 'none';
+    }
+}
+window.albumModalGoTo = function(i) {
+    const post = albumPostsCache[window._albumModalPostId];
+    if (!post) return;
+    window._albumModalImgIdx = i;
+    updateModalImage(post.images || [post.image]);
+};
+
 function openAlbumModal(postId) {
     const post = albumPostsCache[postId];
     if (!post) return;
     window._albumModalPostId = postId;
     window._albumModalSender = post.sender;
-    document.getElementById('album-modal-photo').src = post.image;
+    window._albumModalImgIdx = 0;
+    _replyingToCommentId = null;
+    _replyingToAuthor = null;
+    const images = post.images || [post.image];
+    updateModalImage(images);
     refreshModalContent(postId);
     document.getElementById('album-modal').classList.add('open');
     if (currentActiveUser) {
@@ -1495,6 +1694,26 @@ function openAlbumModal(postId) {
 }
 window.openAlbumModal = openAlbumModal;
 
+function setReplyMode(commentId, authorName) {
+    _replyingToCommentId = commentId;
+    _replyingToAuthor = authorName;
+    const indicator = document.getElementById('amr-reply-indicator');
+    indicator.style.display = 'block';
+    indicator.innerHTML = `↩️ Đang trả lời <strong>${escapeSystemHTML(authorName)}</strong> &nbsp;<button onclick="cancelReply()" style="background:none;border:none;color:#e11d48;cursor:pointer;font-size:11px;font-weight:700;">✕ Huỷ</button>`;
+    document.getElementById('amr-comment-input').placeholder = `Trả lời ${authorName}...`;
+    document.getElementById('amr-comment-input').focus();
+}
+window.setReplyMode = setReplyMode;
+
+function cancelReply() {
+    _replyingToCommentId = null;
+    _replyingToAuthor = null;
+    const indicator = document.getElementById('amr-reply-indicator');
+    indicator.style.display = 'none';
+    document.getElementById('amr-comment-input').placeholder = 'Viết bình luận...';
+}
+window.cancelReply = cancelReply;
+
 function refreshModalContent(postId) {
     const post = albumPostsCache[postId];
     if (!post) return;
@@ -1503,7 +1722,14 @@ function refreshModalContent(postId) {
     const isLiked = currentActiveUser && likes[currentActiveUser];
     const senderAvatar = (profileCache[post.sender] && profileCache[post.sender].avatar)
         ? profileCache[post.sender].avatar : getDefaultAvatar(post.sender);
-    const comments = post.comments ? Object.values(post.comments).sort((a,b) => a.timestamp - b.timestamp) : [];
+    // top-level comments only (no parentId)
+    const allComments = post.comments ? Object.entries(post.comments) : [];
+    const topComments = allComments.filter(([, c]) => !c.parentId).sort((a,b) => a[1].timestamp - b[1].timestamp);
+    const repliesMap = {};
+    allComments.filter(([, c]) => c.parentId).forEach(([id, c]) => {
+        if (!repliesMap[c.parentId]) repliesMap[c.parentId] = [];
+        repliesMap[c.parentId].push([id, c]);
+    });
     document.getElementById('amr-avatar').src = senderAvatar;
     document.getElementById('amr-sender').textContent = post.sender;
     document.getElementById('amr-time').textContent = timeAgo(post.timestamp);
@@ -1512,23 +1738,41 @@ function refreshModalContent(postId) {
     const likeBtn = document.getElementById('amr-like-btn');
     likeBtn.className = 'amr-like-btn' + (isLiked ? ' liked' : '');
     document.getElementById('amr-heart').textContent = isLiked ? '❤️' : '🤍';
-    // hiện nút xóa chỉ với chủ bài
     const delBtn = document.getElementById('amr-delete-btn');
     delBtn.style.display = (currentActiveUser && post.sender === currentActiveUser) ? 'flex' : 'none';
     const scroll = document.getElementById('amr-comments-scroll');
     const wasAtBottom = scroll.scrollTop + scroll.clientHeight >= scroll.scrollHeight - 20;
-    if (comments.length === 0) {
+    if (topComments.length === 0) {
         scroll.innerHTML = `<div class="amr-no-comments">Chưa có bình luận nào.<br>Hãy là người đầu tiên! 💬</div>`;
     } else {
-        scroll.innerHTML = comments.map(c => {
+        scroll.innerHTML = topComments.map(([cId, c]) => {
             const cAv = (profileCache[c.author] && profileCache[c.author].avatar)
                 ? profileCache[c.author].avatar : getDefaultAvatar(c.author);
+            const replies = (repliesMap[cId] || []).sort((a,b) => a[1].timestamp - b[1].timestamp);
+            const repliesHTML = replies.map(([, r]) => {
+                const rAv = (profileCache[r.author] && profileCache[r.author].avatar)
+                    ? profileCache[r.author].avatar : getDefaultAvatar(r.author);
+                return `<div class="apc-reply-item">
+                    <img class="apc-reply-avatar" src="${rAv}" alt="${escapeSystemHTML(r.author)}" onclick="openMiniProfile('${escapeSystemHTML(r.author)}')">
+                    <div class="apc-reply-bubble">
+                        <div class="apc-reply-author" onclick="openMiniProfile('${escapeSystemHTML(r.author)}')">${escapeSystemHTML(r.author)}</div>
+                        <div>${escapeSystemHTML(r.text)}</div>
+                    </div>
+                </div>`;
+            }).join('');
             return `<div class="apc-comment-item">
                 <img class="apc-comment-avatar" src="${cAv}" alt="${escapeSystemHTML(c.author)}"
                      onclick="openMiniProfile('${escapeSystemHTML(c.author)}')">
-                <div class="apc-comment-bubble">
-                    <div class="apc-comment-author" onclick="openMiniProfile('${escapeSystemHTML(c.author)}')">${escapeSystemHTML(c.author)}</div>
-                    <div class="apc-comment-text">${escapeSystemHTML(c.text)}</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="apc-comment-bubble">
+                        <div class="apc-comment-author" onclick="openMiniProfile('${escapeSystemHTML(c.author)}')">${escapeSystemHTML(c.author)}</div>
+                        <div class="apc-comment-text">${escapeSystemHTML(c.text)}</div>
+                    </div>
+                    <div class="apc-comment-actions">
+                        <span class="apc-cmt-time">${timeAgo(c.timestamp)}</span>
+                        <button class="apc-reply-btn" onclick="setReplyMode('${cId}','${escapeSystemHTML(c.author)}')">Trả lời</button>
+                    </div>
+                    ${repliesHTML ? `<div class="apc-replies-wrap">${repliesHTML}</div>` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -1539,6 +1783,7 @@ function refreshModalContent(postId) {
 function closeAlbumModal() {
     document.getElementById('album-modal').classList.remove('open');
     window._albumModalPostId = null;
+    cancelReply();
 }
 window.closeAlbumModal = closeAlbumModal;
 
@@ -1547,7 +1792,7 @@ async function deleteAlbumPost() {
     if (!postId || !currentActiveUser) return;
     const post = albumPostsCache[postId];
     if (!post || post.sender !== currentActiveUser) return;
-    if (!confirm('Xóa ảnh này? Hành động không thể hoàn tác.')) return;
+    if (!confirm('Xóa bài này? Hành động không thể hoàn tác.')) return;
     closeAlbumModal();
     await remove(ref(db, `album_posts/${postId}`));
 }
@@ -1574,9 +1819,12 @@ async function submitModalComment() {
     const text = input.value.trim();
     if (!text) return;
     input.value = '';
-    await push(ref(db, `album_posts/${postId}/comments`), {
-        author: currentActiveUser, text: text, timestamp: Date.now()
-    });
+    const commentData = { author: currentActiveUser, text: text, timestamp: Date.now() };
+    if (_replyingToCommentId) {
+        commentData.parentId = _replyingToCommentId;
+    }
+    await push(ref(db, `album_posts/${postId}/comments`), commentData);
+    cancelReply();
 }
 window.submitModalComment = submitModalComment;
 function handleModalCommentKey(event) {
@@ -1778,15 +2026,40 @@ document.querySelectorAll('.nav-link').forEach(link => {
         }
     });
 });
+
+// ====================================================
+// MEMBER CARDS - click avatar/name to open mini profile
+// ====================================================
+document.querySelectorAll('.member-card').forEach(card => {
+    const avatar = card.querySelector('.member-avatar');
+    const nameEl = card.querySelector('.member-name');
+    // Get member name from the popup or name element
+    const getMemberUsername = () => {
+        // try to find the matching system user by name
+        const displayName = nameEl ? nameEl.textContent.trim() : '';
+        return displayName;
+    };
+    const openCardProfile = (e) => {
+        e.stopPropagation();
+        const name = getMemberUsername();
+        if (name && typeof openMiniProfile === 'function') openMiniProfile(name);
+    };
+    if (avatar) { avatar.style.cursor = 'pointer'; avatar.addEventListener('click', openCardProfile); }
+    if (nameEl) { nameEl.style.cursor = 'pointer'; nameEl.addEventListener('click', openCardProfile); }
+});
+
 </script>
 <!-- ALBUM FB-STYLE MODAL -->
 <div class="album-modal-overlay" id="album-modal" onclick="handleAlbumModalOverlay(event)">
     <div class="album-modal-box" id="album-modal-box">
         <!-- close btn trên ảnh -->
         <button class="album-modal-close" onclick="closeAlbumModal()">✕</button>
-        <!-- LEFT: ảnh -->
+        <!-- LEFT: ảnh + navigation -->
         <div class="album-modal-left">
             <img class="album-modal-photo" id="album-modal-photo" src="" alt="photo">
+            <button class="album-modal-nav prev-btn" id="album-modal-prev" onclick="albumModalNav(-1)" style="display:none">&#8249;</button>
+            <button class="album-modal-nav next-btn" id="album-modal-next" onclick="albumModalNav(1)" style="display:none">&#8250;</button>
+            <div class="album-modal-dots" id="album-modal-dots"></div>
         </div>
         <!-- RIGHT: info + comments -->
         <div class="album-modal-right">
@@ -1797,6 +2070,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
                     <div class="amr-time" id="amr-time">—</div>
                 </div>
                 <button class="amr-delete-btn" id="amr-delete-btn" onclick="deleteAlbumPost()" style="display:none">🗑 Xóa</button>
+                <button class="amr-close-btn" onclick="closeAlbumModal()" title="Đóng bài">✕</button>
             </div>
             <div class="amr-caption" id="amr-caption"></div>
             <div class="amr-like-bar">
@@ -1808,10 +2082,13 @@ document.querySelectorAll('.nav-link').forEach(link => {
             <div class="amr-comments-scroll" id="amr-comments-scroll">
                 <div class="amr-no-comments">Chưa có bình luận nào.<br>Hãy là người đầu tiên! 💬</div>
             </div>
-            <div class="amr-comment-form">
-                <img class="amr-my-avatar" id="amr-my-avatar" src="" alt="me">
-                <input class="amr-comment-input" id="amr-comment-input" placeholder="Viết bình luận..." onkeydown="handleModalCommentKey(event)">
-                <button class="amr-comment-send" onclick="submitModalComment()">➤</button>
+            <div class="amr-comment-form" style="flex-direction:column;gap:0;">
+                <div id="amr-reply-indicator" style="display:none;font-size:11px;color:#db2777;font-weight:700;padding:4px 4px 2px;"></div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <img class="amr-my-avatar" id="amr-my-avatar" src="" alt="me">
+                    <input class="amr-comment-input" id="amr-comment-input" placeholder="Viết bình luận..." onkeydown="handleModalCommentKey(event)">
+                    <button class="amr-comment-send" onclick="submitModalComment()">➤</button>
+                </div>
             </div>
         </div>
     </div>

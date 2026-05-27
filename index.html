@@ -1040,6 +1040,121 @@
 .chat-msg-imgs-grid { display: flex; flex-wrap: wrap; gap: 4px; max-width: 210px; }
 .chat-msg-imgs-grid .chat-msg-img { max-width: 100px; max-height: 100px; margin: 0; }
 
+/* ====================================================
+   THU HỒI TIN NHẮN
+==================================================== */
+.chat-msg-row-wrap {
+    position: relative;
+}
+.chat-msg-row-wrap:hover .msg-recall-btn,
+.chat-msg-row-wrap.show-recall-menu .msg-recall-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+.msg-recall-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--card-sub-bg);
+    border: 1.5px solid var(--card-border);
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+    flex-shrink: 0;
+}
+.msg-recall-btn:hover {
+    background: rgba(225,29,72,0.12);
+    border-color: #e11d48;
+    color: #e11d48;
+    transform: translateY(-50%) scale(1.1);
+}
+/* Nút ... nằm bên phải tin nhắn của tôi, bên trái tin của người khác */
+.wrap-me .msg-recall-btn {
+    right: calc(100% + 6px);
+    left: auto;
+}
+.chat-msg-row-wrap:not(.wrap-me) .msg-recall-btn {
+    left: calc(100% + 6px);
+    right: auto;
+    /* chỉ chủ sở hữu mới thấy, ẩn với người khác qua JS */
+}
+
+/* Context menu thu hồi */
+.msg-recall-menu {
+    position: absolute;
+    background: var(--popup-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    padding: 4px;
+    z-index: 200;
+    min-width: 150px;
+    animation: fadeInUp 0.15s ease;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.wrap-me .msg-recall-menu {
+    right: calc(100% + 36px);
+    left: auto;
+}
+.chat-msg-row-wrap:not(.wrap-me) .msg-recall-menu {
+    left: calc(100% + 36px);
+    right: auto;
+}
+.msg-recall-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    transition: all 0.18s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+.msg-recall-menu-item:hover {
+    background: rgba(225,29,72,0.1);
+    color: #e11d48;
+}
+.msg-recall-menu-item.danger { color: #e11d48; }
+.msg-recall-menu-item.danger:hover { background: rgba(225,29,72,0.15); }
+
+/* Bubble tin nhắn đã thu hồi */
+.chat-msg-recalled {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 7px 12px;
+    border: 1.5px dashed var(--card-border);
+    border-radius: 16px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.75;
+}
+.chat-msg-recalled-icon {
+    font-size: 14px;
+    opacity: 0.6;
+}
+
 /* Lightbox */
 .chat-lightbox {
     position: fixed; inset: 0; background: rgba(0,0,0,0.9);
@@ -2076,6 +2191,7 @@ async function renderSystemMessages() {
             ? profileCache[msg.sender].avatar : getDefaultAvatar(msg.sender);
         const wrapDiv = document.createElement("div");
         wrapDiv.className = `chat-msg-row-wrap ${isMe ? 'wrap-me' : ''}`;
+        wrapDiv.dataset.msgKey = msg._key || '';
         const avatarImg = document.createElement("img");
         avatarImg.className = "chat-msg-avatar";
         avatarImg.src = senderAvatar;
@@ -2084,7 +2200,10 @@ async function renderSystemMessages() {
         const msgDiv = document.createElement("div");
         msgDiv.className = `chat-msg-row ${isMe ? 'type-me' : 'type-other'}`;
 
-        if (msg.type === 'image' && msg.images) {
+        if (msg.recalled) {
+            // Tin nhắn đã thu hồi
+            msgDiv.innerHTML = `<div class="chat-msg-recalled"><span class="chat-msg-recalled-icon">🚫</span> ${isMe ? 'Bạn đã thu hồi tin nhắn này' : `<em>${escapeSystemHTML(msg.sender)}</em> đã thu hồi tin nhắn`}</div>`;
+        } else if (msg.type === 'image' && msg.images) {
             // Image message
             const imgCount = msg.images.length;
             const gridClass = imgCount > 1 ? 'chat-msg-imgs-grid' : '';
@@ -2108,12 +2227,80 @@ async function renderSystemMessages() {
         } else {
             msgDiv.innerHTML = `<div class="msg-sender-name">${escapeSystemHTML(msg.sender)}</div><div>${escapeSystemHTML(msg.content || '')}</div>`;
         }
+
+        // Nút ... để thu hồi (chỉ chủ sở hữu mới thấy, và tin chưa thu hồi)
+        if (isMe && !msg.recalled && msg._key) {
+            const recallBtn = document.createElement("button");
+            recallBtn.className = "msg-recall-btn";
+            recallBtn.title = "Tùy chọn";
+            recallBtn.textContent = "···";
+            recallBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleRecallMenu(wrapDiv, msg._key);
+            });
+            wrapDiv.appendChild(recallBtn);
+        }
+
         wrapDiv.appendChild(avatarImg);
         wrapDiv.appendChild(msgDiv);
         chatBox.appendChild(wrapDiv);
     }
     if (atBottom || chatHistoryCache.length <= 1) chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+// Toggle context menu thu hồi
+let _activeRecallMenu = null;
+function toggleRecallMenu(wrapDiv, msgKey) {
+    // Đóng menu cũ nếu có
+    if (_activeRecallMenu) {
+        _activeRecallMenu.remove();
+        const oldWrap = document.querySelector('.chat-msg-row-wrap.show-recall-menu');
+        if (oldWrap) oldWrap.classList.remove('show-recall-menu');
+        if (_activeRecallMenu._wrapDiv === wrapDiv) { _activeRecallMenu = null; return; }
+        _activeRecallMenu = null;
+    }
+    wrapDiv.classList.add('show-recall-menu');
+    const menu = document.createElement("div");
+    menu.className = "msg-recall-menu";
+    menu._wrapDiv = wrapDiv;
+    menu.innerHTML = `
+        <button class="msg-recall-menu-item danger" onclick="recallMessage('${msgKey}')">
+            🚫 Thu hồi tin nhắn
+        </button>
+    `;
+    wrapDiv.appendChild(menu);
+    _activeRecallMenu = menu;
+    _activeRecallMenu._wrapDiv = wrapDiv;
+    // Đóng khi click ngoài
+    setTimeout(() => {
+        document.addEventListener('click', closeRecallMenuOutside, { once: true });
+    }, 10);
+}
+
+function closeRecallMenuOutside() {
+    if (_activeRecallMenu) {
+        _activeRecallMenu.remove();
+        const oldWrap = document.querySelector('.chat-msg-row-wrap.show-recall-menu');
+        if (oldWrap) oldWrap.classList.remove('show-recall-menu');
+        _activeRecallMenu = null;
+    }
+}
+
+// Thu hồi tin nhắn — cập nhật Firebase để mọi người đều thấy
+window.recallMessage = async function(msgKey) {
+    if (!msgKey || !currentActiveUser) return;
+    closeRecallMenuOutside();
+    try {
+        await update(ref(db, `chat_messages/${msgKey}`), {
+            recalled: true,
+            content: '',
+            images: null,
+            voice: null
+        });
+    } catch(e) {
+        alert('Thu hồi thất bại, thử lại!');
+    }
+};
 
 function formatVoiceTime(sec) {
     const s = Math.round(sec);
@@ -2263,7 +2450,7 @@ window.stopVoiceRecord = async function(e) {
 function startRealtimeChat() {
     onValue(ref(db, 'chat_messages'), (snap) => {
         const data = snap.val() || {};
-        chatHistoryCache = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+        chatHistoryCache = Object.entries(data).map(([k, v]) => ({ ...v, _key: k })).sort((a, b) => a.timestamp - b.timestamp);
         chatMessagesCount = chatHistoryCache.length;
         const chatOpen = document.getElementById("sys-chat-popup").classList.contains("is-active");
         if (chatOpen) {

@@ -180,6 +180,7 @@
             background-color: var(--card-sub-bg); border: 1px solid var(--card-border);
             border-radius: 16px; padding: 16px 8px; text-align: center;
             transition: all 0.4s cubic-bezier(0.165,0.84,0.44,1); position: relative;
+            cursor: pointer;
         }
         .member-card:hover { transform: translateY(-8px); background-color: var(--popup-bg); border-color: #f43f5e; box-shadow: 0 10px 20px rgba(244,63,94,0.15); z-index: 10; }
         .member-avatar {
@@ -1787,6 +1788,17 @@ function handleMiniProfileOverlayClick(e) { if (e.target === document.getElement
 window.openMiniProfile = openMiniProfile;
 window.closeMiniProfile = closeMiniProfile;
 window.handleMiniProfileOverlayClick = handleMiniProfileOverlayClick;
+// Báo cho event delegation biết module đã sẵn sàng
+window.dispatchEvent(new Event('module-ready'));
+
+// Gắn click cho member cards ngay trong module - đảm bảo openMiniProfile luôn sẵn sàng
+document.querySelectorAll('.member-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+        if (e.target.closest('.member-profile-popup')) return;
+        const username = this.dataset.username || '';
+        if (username) openMiniProfile(username);
+    });
+});
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeProfileModal(); closeMiniProfile(); } });
 
@@ -2910,22 +2922,6 @@ document.querySelectorAll('.nav-link').forEach(link => {
     });
 });
 
-// ====================================================
-// MEMBER CARDS - bấm vào card để hiện mini profile
-// ====================================================
-document.querySelectorAll('.member-card').forEach(card => {
-    const nameEl = card.querySelector('.member-name');
-    const getCardUsername = () => {
-        return card.dataset.username || (nameEl ? nameEl.textContent.trim() : '');
-    };
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => {
-        const username = getCardUsername();
-        if (username && typeof window.openMiniProfile === 'function') {
-            window.openMiniProfile(username);
-        }
-    });
-});
 
 </script>
 <!-- ALBUM FB-STYLE MODAL -->

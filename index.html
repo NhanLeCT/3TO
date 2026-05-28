@@ -1784,6 +1784,7 @@ async function openMiniProfile(username) {
 }
 function closeMiniProfile() { document.getElementById("mini-profile-overlay").classList.remove("is-open"); }
 function handleMiniProfileOverlayClick(e) { if (e.target === document.getElementById("mini-profile-overlay")) closeMiniProfile(); }
+window.openMiniProfile = openMiniProfile;
 window.closeMiniProfile = closeMiniProfile;
 window.handleMiniProfileOverlayClick = handleMiniProfileOverlayClick;
 
@@ -2910,22 +2911,20 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 // ====================================================
-// MEMBER CARDS - click avatar/name to open mini profile
+// MEMBER CARDS - bấm vào card để hiện mini profile
 // ====================================================
 document.querySelectorAll('.member-card').forEach(card => {
-    const avatar = card.querySelector('.member-avatar');
     const nameEl = card.querySelector('.member-name');
     const getCardUsername = () => {
-        // Ưu tiên data-username (tên acc), fallback về tên hiển thị
         return card.dataset.username || (nameEl ? nameEl.textContent.trim() : '');
     };
-    const openCardProfile = (e) => {
-        e.stopPropagation();
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
         const username = getCardUsername();
-        if (username && typeof openMiniProfile === 'function') openMiniProfile(username);
-    };
-    if (avatar) { avatar.style.cursor = 'pointer'; avatar.addEventListener('click', openCardProfile); }
-    if (nameEl) { nameEl.style.cursor = 'pointer'; nameEl.addEventListener('click', openCardProfile); }
+        if (username && typeof window.openMiniProfile === 'function') {
+            window.openMiniProfile(username);
+        }
+    });
 });
 
 </script>
